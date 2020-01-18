@@ -1,5 +1,6 @@
 import PeerNetwork from "./network/peer_network";
 import { TextLabel } from "./gui/textLabel";
+import Wall, { WallThickness } from './entities/arena/wall';
 import * as Const from "./constants";
 import _ from "lodash";
 import Player from "./entities/player";
@@ -10,6 +11,7 @@ export default class LevelManager {
   _connectionStatusText: any;
   _entitiesGroup: any;
   _physics: any;
+  staticObjects: Phaser.Physics.Arcade.Group;
   localPlayer: any;
   blocksGroup: any;
   itemBlocksGroup: any;
@@ -21,6 +23,7 @@ export default class LevelManager {
     this.scene = scene;
     this.network = null;
     this.remotePlayers = null;
+    this.staticObjects = new Phaser.Physics.Arcade.Group(this.scene.physics.world, scene);
 
     this._connectionStatusText = null;
 
@@ -53,6 +56,30 @@ export default class LevelManager {
     this.localPlayer.setup(this.scene);
     this.scene.cameras.main.startFollow(this.localPlayer);
     this._entitiesGroup.add(this.localPlayer);
+
+    const wallunit = 250;
+    const thick = WallThickness/2;
+    const bits = [
+      {x: 32, y: 100, length: wallunit*2, angle: 0}, // bottom
+      {x: 32+wallunit, y: 100-(wallunit/2)+thick, length: wallunit, angle: -90}, // bottom right
+      {x: 32+(wallunit*1.5)-thick, y: 100-(wallunit)+thick, length: wallunit, angle: 0}, // right bottom
+      {x: 32+(wallunit*2)-thick, y: 100-(wallunit*2)+WallThickness, length: wallunit*2, angle: -90}, // right
+      {x: 32+(wallunit*1.5), y: 100-(wallunit*3)+WallThickness, length: wallunit, angle: 180}, // right top
+      {x: 32+wallunit, y: 100-(wallunit*3.5)+WallThickness*1.5, length: wallunit, angle: -90}, // top right
+      {x: 32, y: 100-(wallunit*4)+(thick*4), length: wallunit*2, angle: 0}, // top
+      {x: 32-wallunit, y: 100-(wallunit*3.5)+WallThickness*1.5, length: wallunit, angle: 90}, // top left
+      {x: 32-(wallunit*1.5), y: 100-(wallunit*3)+WallThickness, length: wallunit, angle: 180}, // left top
+      {x: 32-(wallunit*2)+thick, y: 100-(wallunit*2)+WallThickness, length: wallunit*2, angle: 90}, // left
+      {x: 32-(wallunit*1.5)+thick, y: 100-(wallunit)+thick, length: wallunit, angle: 0}, // left bottom
+      {x: 32-wallunit, y: 100-(wallunit/2)+thick, length: wallunit, angle: 90}, // bottom left
+
+
+    ]
+    for (const b of bits) {
+      const wall = new Wall(this.scene, b.x, b.y, b.length, b.angle);
+      wall.setup(this.scene);
+      this._entitiesGroup.add(wall);
+    }
 
     // this._createMap();
     // this._createMapObjects();
