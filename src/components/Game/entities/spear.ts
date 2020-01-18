@@ -12,9 +12,8 @@ class Spear extends Phaser.Physics.Arcade.Sprite {
   _maxSpeed: number;
   _enemyHit: boolean;
   _wallHit: boolean;
-  constructor(scene, x, y, id = "local", key, frame, angle = 0) {
-    super(scene, x, y, key, frame);
-
+  constructor(scene, x, y, id, angle = 0) {
+    super(scene, x, y, "spear", 0);
     this.id = id;
     this._angle = angle;
     this._initSpeed = INIT_SPEED;

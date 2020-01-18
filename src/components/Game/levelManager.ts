@@ -58,15 +58,20 @@ export default class LevelManager {
     this.network.addListener(Const.PeerJsEvents.DATA, this._onData, this);
     this.network.addListener(Const.PeerJsEvents.CLOSE, this._onClose, this);
     const createSpear = () => {
+      const ID = "id"
       const spear = new Spear(
         this.scene,
         this.localPlayer.x,
         this.localPlayer.y,
-        "ddf",
-        "dff",
-        "sdsd",
+        ID,
         this.localPlayer.rotation
       );
+      this.network.broadcastToPeers(Const.PeerJsMsgType.SPEAR_CREATED, {
+        id: ID,
+        rotation: this.localPlayer.rotation,
+        x: Math.round(this.localPlayer.x),
+        y: Math.round(this.localPlayer.y),
+      });
       spear.setup(this.scene, this._spearGroup, [this.localPlayer.body.velocity.x, this.localPlayer.body.velocity.y]);
     };
     this.localPlayer = new Player(this.scene, 32, 100, "local", true, createSpear);
@@ -189,6 +194,9 @@ export default class LevelManager {
       case Const.PeerJsMsgType.ITEM_BLOCK_BUMP:
         this._handleItemBlockBump(data);
         break;
+      case Const.PeerJsMsgType.SPEAR_CREATED:
+        this._handleSpearCreated(data)
+        break;
     }
   }
 
@@ -256,5 +264,15 @@ export default class LevelManager {
 
   _handleItemBlockBump(data) {
     this.itemBlocksGroup.getAt(data.idx).bump();
+  }
+  _handleSpearCreated(data) {
+    const spear = new Spear(
+      this.scene,
+      data.x,
+      data.y,
+      data.id,
+      data.rotation
+    );
+    spear.setup(this.scene, this._spearGroup);
   }
 }
