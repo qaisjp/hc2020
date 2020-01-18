@@ -1,6 +1,7 @@
 import PeerNetwork from "./network/peer_network";
 import { TextLabel } from "./gui/textLabel";
 import Wall, { WallThickness } from './entities/arena/wall';
+import Door from './entities/arena/door';
 import * as Const from "./constants";
 import _ from "lodash";
 import Player from "./entities/player";
@@ -82,6 +83,8 @@ export default class LevelManager {
       wall.setup(this.scene, this._blockGroup);
       this._blockGroup.add(wall);
     }
+    const door = new Door(this.scene, 0, 0);
+    door.setup(this.scene);
     this.scene.physics.add.collider(this.localPlayer, this._blockGroup);
 
     // this._createMap();
