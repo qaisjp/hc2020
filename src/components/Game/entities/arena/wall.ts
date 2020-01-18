@@ -2,15 +2,17 @@ import Phaser from "phaser"
 
 export const WallThickness = 10
 
-export default class Wall extends Phaser.Physics.Arcade.Sprite {
+export default class Wall extends Phaser.GameObjects.Rectangle {
 
     constructor(scene, x, y, length, angle) {
-        super(scene, x, y, length, WallThickness);
-        this.angle = angle;
+        if (angle !== 0) {
+            super(scene, x, y, length, WallThickness, 0xffffff);
+        } else {
+            super(scene, x, y, WallThickness, length, 0xffffff);
+        }
     }
 
     setup(scene : Phaser.Scene, group: Phaser.Physics.Arcade.StaticGroup) {
-        console.log("wall setup")
         // scene.physics.world.enable(this);
         // group.add(this)
         scene.add.existing(this);
