@@ -1,15 +1,17 @@
 import PeerNetwork from "./network/peer_network";
 import { TextLabel } from "./gui/textLabel";
-import Wall, { WallThickness } from './entities/arena/wall';
+import Wall, { WallThickness } from "./entities/arena/wall";
 import * as Const from "./constants";
 import _ from "lodash";
 import Player from "./entities/player";
+import Spear from "./entities/spear";
 
 export default class LevelManager {
   network: any;
   remotePlayers: any;
   _connectionStatusText: any;
-  _entitiesGroup: any;
+  _entitiesGroup: Phaser.GameObjects.Group;
+  _spearGroup: Phaser.GameObjects.Group;
   _blockGroup: Phaser.Physics.Arcade.StaticGroup;
   _physics: any;
   staticObjects: Phaser.Physics.Arcade.Group;
@@ -31,11 +33,12 @@ export default class LevelManager {
     // make sure to cleanup peerjs when window is closed
     window.onunload = window.onbeforeunload = f => {
       this._disconnect();
-      return
-    }
+      return;
+    };
     console.log(scene);
     // Init groups
     this._entitiesGroup = this.scene.add.group();
+    this._spearGroup = this.scene.add.group();
     this._blockGroup = this.scene.physics.add.staticGroup();
     this._createWorld();
   }
@@ -54,35 +57,48 @@ export default class LevelManager {
     this.network.addListener(Const.PeerJsEvents.OPEN, this._onOpen, this);
     this.network.addListener(Const.PeerJsEvents.DATA, this._onData, this);
     this.network.addListener(Const.PeerJsEvents.CLOSE, this._onClose, this);
-
-    this.localPlayer = new Player(this.scene, 32, 100, "local", true);
+    const createSpear = () => {
+      const spear = new Spear(
+        this.scene,
+        this.localPlayer.x,
+        this.localPlayer.y,
+        "ddf",
+        "dff",
+        "sdsd",
+        this.localPlayer.rotation
+      );
+      spear.setup(this.scene, this._spearGroup, [this.localPlayer.body.velocity.x, this.localPlayer.body.velocity.y]);
+    };
+    this.localPlayer = new Player(this.scene, 32, 100, "local", true, createSpear);
     this.localPlayer.setup(this.scene);
     this.scene.cameras.main.startFollow(this.localPlayer);
     this._entitiesGroup.add(this.localPlayer);
     const wallunit = 250;
-    const thick = WallThickness/2;
+    const thick = WallThickness / 2;
     const bits = [
-      {x: 32, y: 100, length: wallunit*2, angle: 0}, // bottom
-      {x: 32+wallunit, y: 100-(wallunit/2)+thick, length: wallunit, angle: -90}, // bottom right
-      {x: 32+(wallunit*1.5)-thick, y: 100-(wallunit)+thick, length: wallunit, angle: 0}, // right bottom
-      {x: 32+(wallunit*2)-thick, y: 100-(wallunit*2)+WallThickness, length: wallunit*2, angle: -90}, // right
-      {x: 32+(wallunit*1.5), y: 100-(wallunit*3)+WallThickness, length: wallunit, angle: 180}, // right top
-      {x: 32+wallunit, y: 100-(wallunit*3.5)+WallThickness*1.5, length: wallunit, angle: -90}, // top right
-      {x: 32, y: 100-(wallunit*4)+(thick*4), length: wallunit*2, angle: 0}, // top
-      {x: 32-wallunit, y: 100-(wallunit*3.5)+WallThickness*1.5, length: wallunit, angle: 90}, // top left
-      {x: 32-(wallunit*1.5), y: 100-(wallunit*3)+WallThickness, length: wallunit, angle: 180}, // left top
-      {x: 32-(wallunit*2)+thick, y: 100-(wallunit*2)+WallThickness, length: wallunit*2, angle: 90}, // left
-      {x: 32-(wallunit*1.5)+thick, y: 100-(wallunit)+thick, length: wallunit, angle: 0}, // left bottom
-      {x: 32-wallunit, y: 100-(wallunit/2)+thick, length: wallunit, angle: 90}, // bottom left
-
-
-    ]
+      { x: 32, y: 100, length: wallunit * 2, angle: 0 }, // bottom
+      { x: 32 + wallunit, y: 100 - wallunit / 2 + thick, length: wallunit, angle: -90 }, // bottom right
+      { x: 32 + wallunit * 1.5 - thick, y: 100 - wallunit + thick, length: wallunit, angle: 0 }, // right bottom
+      { x: 32 + wallunit * 2 - thick, y: 100 - wallunit * 2 + WallThickness, length: wallunit * 2, angle: -90 }, // right
+      { x: 32 + wallunit * 1.5, y: 100 - wallunit * 3 + WallThickness, length: wallunit, angle: 180 }, // right top
+      { x: 32 + wallunit, y: 100 - wallunit * 3.5 + WallThickness * 1.5, length: wallunit, angle: -90 }, // top right
+      { x: 32, y: 100 - wallunit * 4 + thick * 4, length: wallunit * 2, angle: 0 }, // top
+      { x: 32 - wallunit, y: 100 - wallunit * 3.5 + WallThickness * 1.5, length: wallunit, angle: 90 }, // top left
+      { x: 32 - wallunit * 1.5, y: 100 - wallunit * 3 + WallThickness, length: wallunit, angle: 180 }, // left top
+      { x: 32 - wallunit * 2 + thick, y: 100 - wallunit * 2 + WallThickness, length: wallunit * 2, angle: 90 }, // left
+      { x: 32 - wallunit * 1.5 + thick, y: 100 - wallunit + thick, length: wallunit, angle: 0 }, // left bottom
+      { x: 32 - wallunit, y: 100 - wallunit / 2 + thick, length: wallunit, angle: 90 } // bottom left
+    ];
     for (const b of bits) {
       const wall = new Wall(this.scene, b.x, b.y, b.length, b.angle);
       wall.setup(this.scene, this._blockGroup);
       this._blockGroup.add(wall);
     }
     this.scene.physics.add.collider(this.localPlayer, this._blockGroup);
+    this.scene.physics.add.collider(this._spearGroup, this._blockGroup, (spear, block) => {
+      const s = spear as Spear;
+      s._wallHit = true;
+    });
 
     // this._createMap();
     // this._createMapObjects();
@@ -117,6 +133,9 @@ export default class LevelManager {
     for (const e of this._entitiesGroup.getChildren()) {
       e.update();
     }
+    for (const s of this._spearGroup.getChildren()) {
+      s.update();
+    }
     this._broadcastPlayerUpdate();
   }
 
@@ -132,7 +151,7 @@ export default class LevelManager {
       state: this.localPlayer.currentState,
       x: Math.round(this.localPlayer.x),
       y: Math.round(this.localPlayer.y),
-      v: body.velocity.y.toFixed(2),
+      v: body.velocity.y.toFixed(2)
       // a: body.acceleration.x.toFixed(2)
     });
   }
@@ -175,9 +194,9 @@ export default class LevelManager {
 
   _onClose(peer) {
     _.forEach(this.remotePlayers.getChildren(), player => {
-      if(player.id === peer){
+      if (player.id === peer) {
         player.destroy();
-      };
+      }
     });
   }
 
