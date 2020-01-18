@@ -29,11 +29,11 @@ class Player extends Entity {
   cursors: Phaser.Types.Input.Keyboard.CursorKeys | undefined;
   _velocity: any;
   _accel: any;
-    isPlayer: boolean;
+  isPlayer: boolean;
   constructor(scene, x, y, id = "local", isPlayer = false) {
     super(scene, x, y, "playersheet", 0, /** Const.PLAYER_ACCEL */ 1);
     this.id = id;
-    this.isPlayer = isPlayer
+    this.isPlayer = isPlayer;
     // this.maxSpeed = Const.PLAYER_MAX_SPEED;
     // this.currentState = PlayerStates.IDLE;
     this.jumpReleased = true;
@@ -51,12 +51,14 @@ class Player extends Entity {
   setup(scene) {
     super.setup(scene);
     this.cursors = this.scene.input.keyboard.createCursorKeys();
+    this.setCollideWorldBounds(false)
     if (this.body) {
       const body = this.body as Phaser.Physics.Arcade.Body;
       this._velocity = body.velocity;
       this._accel = body.acceleration;
-    //   body.maxVelocity.set(10, 10 * 10);
-    //   body.drag.set(1, 0);
+      //   body.maxVelocity.set(10, 10 * 10);
+      body.setDrag(1200, 1200);
+      body.setMaxSpeed(300);
       body.setSize(body.width - 2, body.height);
     }
   }
@@ -64,21 +66,48 @@ class Player extends Entity {
   update() {
     if (this.cursors && this.body && this.isPlayer) {
       const body = this.body as Phaser.Physics.Arcade.Body;
+      const pointer = this.scene.input.activePointer;
+      const directionRad = Phaser.Math.Angle.Between(
+        body.x,
+        body.y,
+        pointer.x + this.scene.cameras.main.scrollX,
+        pointer.y + +this.scene.cameras.main.scrollY
+      );
+      // const directionRad = 0
+      const direction = (directionRad / (2 * Math.PI)) * 360;
+      // const direction = Math.atan((pointer.x - body.x) / (pointer.y - body.y)) / (2 * Math.PI) * 360;
+      //some light randomness to the bullet angle
+      // Calculate X and y velocity of bullet to moves it from shooter to target
+      // if (pointer.y >= this.y) {
+      //   this.xSpeed = this.speed * Math.sin(this.direction);
+      //   this.ySpeed = this.speed * Math.cos(this.direction);
+      // } else {
+      //   this.xSpeed = -this.speed * Math.sin(this.direction);
+      //   this.ySpeed = -this.speed * Math.cos(this.direction);
+      // }
+      console.log(direction);
+      body.rotation = direction; // angle bullet with shooters rotation
+      let localXAcceleration = 0;
+      let localYAcceleration = 0;
       if (this.cursors.left && this.cursors.left.isDown) {
-        body.setVelocityX(-200);
+        localXAcceleration = -6000;
       } else if (this.cursors.right && this.cursors.right.isDown) {
-        body.setVelocityX(200);
+        localXAcceleration = 6000;
       } else {
-        body.setVelocityX(0);
+        localXAcceleration = 0;
       }
 
       if (this.cursors.down && this.cursors.down.isDown) {
-        body.setVelocityY(200);
+        localYAcceleration = 6000;
       } else if (this.cursors.up && this.cursors.up.isDown) {
-        body.setVelocityY(-200);
+        localYAcceleration = -6000;
       } else {
-        body.setVelocityY(0);
+        localYAcceleration = 0;
       }
+      // const accelerationX = Math.sin(directionRad) * localXAcceleration + Math.cos(directionRad) * localYAcceleration;
+      // const accelerationY = Math.cos(directionRad) * localXAcceleration + Math.sin(directionRad) * localYAcceleration;
+      body.setAccelerationX(localXAcceleration);
+      body.setAccelerationY(localYAcceleration);
     }
     // this._updateAnimations();
     // this._grounded = this.body.onFloor() || this.body.touching.down;
