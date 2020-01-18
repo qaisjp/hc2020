@@ -62,18 +62,18 @@ export default class LevelManager {
     const wallunit = 250;
     const thick = WallThickness/2;
     const bits = [
-      {x: 32, y: 100, length: wallunit*2, angle: 0}, // bottom
-      {x: 32+wallunit, y: 100-(wallunit/2)+thick, length: wallunit, angle: -90}, // bottom right
-      {x: 32+(wallunit*1.5)-thick, y: 100-(wallunit)+thick, length: wallunit, angle: 0}, // right bottom
-      {x: 32+(wallunit*2)-thick, y: 100-(wallunit*2)+WallThickness, length: wallunit*2, angle: -90}, // right
-      {x: 32+(wallunit*1.5), y: 100-(wallunit*3)+WallThickness, length: wallunit, angle: 180}, // right top
-      {x: 32+wallunit, y: 100-(wallunit*3.5)+WallThickness*1.5, length: wallunit, angle: -90}, // top right
-      {x: 32, y: 100-(wallunit*4)+(thick*4), length: wallunit*2, angle: 0}, // top
-      {x: 32-wallunit, y: 100-(wallunit*3.5)+WallThickness*1.5, length: wallunit, angle: 90}, // top left
-      {x: 32-(wallunit*1.5), y: 100-(wallunit*3)+WallThickness, length: wallunit, angle: 180}, // left top
-      {x: 32-(wallunit*2)+thick, y: 100-(wallunit*2)+WallThickness, length: wallunit*2, angle: 90}, // left
-      {x: 32-(wallunit*1.5)+thick, y: 100-(wallunit)+thick, length: wallunit, angle: 0}, // left bottom
-      {x: 32-wallunit, y: 100-(wallunit/2)+thick, length: wallunit, angle: 90}, // bottom left
+      {x: 32, y: 100, length: wallunit*2, angle: 90}, // bottom
+      {x: 32+wallunit, y: 100-(wallunit/2)+thick, length: wallunit, angle: 0}, // bottom right
+      {x: 32+(wallunit*1.5)-thick, y: 100-(wallunit)+thick, length: wallunit, angle: 90}, // right bottom
+      {x: 32+(wallunit*2)-thick, y: 100-(wallunit*2)+WallThickness, length: wallunit*2, angle: 0}, // right
+      {x: 32+(wallunit*1.5), y: 100-(wallunit*3)+WallThickness, length: wallunit, angle: 90}, // right top
+      {x: 32+wallunit, y: 100-(wallunit*3.5)+WallThickness*1.5, length: wallunit, angle: 0}, // top right
+      {x: 32, y: 100-(wallunit*4)+(thick*4), length: wallunit*2, angle: 90}, // top
+      {x: 32-wallunit, y: 100-(wallunit*3.5)+WallThickness*1.5, length: wallunit, angle: 0}, // top left
+      {x: 32-(wallunit*1.5), y: 100-(wallunit*3)+WallThickness, length: wallunit, angle: 90}, // left top
+      {x: 32-(wallunit*2)+thick, y: 100-(wallunit*2)+WallThickness, length: wallunit*2, angle: 0}, // left
+      {x: 32-(wallunit*1.5)+thick, y: 100-(wallunit)+thick, length: wallunit, angle: 90}, // left bottom
+      {x: 32-wallunit, y: 100-(wallunit/2)+thick, length: wallunit, angle: 0}, // bottom left
 
 
     ]
