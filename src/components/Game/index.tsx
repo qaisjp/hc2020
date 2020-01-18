@@ -1,4 +1,4 @@
-import React, {useRef} from 'react'
+import React, { useRef, useEffect, useState } from 'react'
 import Phaser from "phaser";
 import logoImg from "../../imgs/img.jpg";
 
@@ -7,7 +7,7 @@ function preload() {
 }
 
 function create() {
-  const logo = this.add.image(400, 150, "logo");
+  const logo = this.add.image(800, 600, "logo");
 
   this.tweens.add({
     targets: logo,
@@ -21,22 +21,33 @@ function create() {
 
 
 const Game = () => {
-    const ref = useRef();
+  useEffect(() => {
+    let game;
+
+    window.addEventListener('resize', () => {
+      game.scale.resize(window.innerWidth, window.innerHeight);
+    })
 
     const config = {
-        type: Phaser.AUTO,
-        parent: "phaser-example",
-        width: 800,
-        height: 600,
-        scene: {
+      type: Phaser.AUTO,
+      parent: "phaser-example",
+      width: 1920,
+      height: 1080,
+      scene: {
         preload: preload,
         create: create
-        }
+      },
+      scale: {
+        mode: Phaser.Scale.NONE
+      }
     };
 
-    const game = new Phaser.Game(config);
+    game = new Phaser.Game(config);
 
-    return <div id="phaser-example"></div>;
+    return () => {};
+  }, [])
+
+  return <div id="phaser-example"></div>;
 }
 
 export default Game
