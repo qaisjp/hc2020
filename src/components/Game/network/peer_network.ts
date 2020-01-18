@@ -107,6 +107,7 @@ class PeerNetwork {
 
   destroy() {
     if (!!this.peer && !this.peer.destroyed) {
+      console.log("Destroying...")
       this.peer.destroy();
     }
   }

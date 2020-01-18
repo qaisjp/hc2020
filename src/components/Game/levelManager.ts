@@ -25,7 +25,10 @@ export default class LevelManager {
     this._connectionStatusText = null;
 
     // make sure to cleanup peerjs when window is closed
-    window.onunload = window.onbeforeunload = f => this._disconnect();
+    window.onunload = window.onbeforeunload = f => {
+      this._disconnect();
+      return
+    }
     console.log(scene);
     this._entitiesGroup = this.scene.add.group();
     this._createWorld();
