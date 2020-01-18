@@ -116,7 +116,7 @@ export default class LevelManager {
    */
   _onOpen(id) {
     this._connectionStatusText.setText(`connected, id: ${id}`);
-    this.scene.time.delayedCall(Const.NETWORK_STATUS_CLEAR_TIME, f => (this._connectionStatusText.visible = false));
+    // this.scene.time.delayedCall(Const.NETWORK_STATUS_CLEAR_TIME, f => (this._connectionStatusText.visible = false));
   }
 
   _onData(type, data) {
