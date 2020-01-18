@@ -128,12 +128,12 @@ export default class LevelManager {
     var body = this.localPlayer.body;
     // console.log("Broadcasting...")
     this.network.broadcastToPeers(Const.PeerJsMsgType.PLAYER_UPDATE, {
-      facing: this.localPlayer.facing,
+      rotation: this.localPlayer.rotation,
       state: this.localPlayer.currentState,
       x: Math.round(this.localPlayer.x),
       y: Math.round(this.localPlayer.y),
       v: body.velocity.y.toFixed(2),
-      a: body.acceleration.x.toFixed(2)
+      // a: body.acceleration.x.toFixed(2)
     });
   }
 
@@ -174,17 +174,11 @@ export default class LevelManager {
   }
 
   _onClose(peer) {
-    var remotePlayer = _.find(this.remotePlayers.getChildren(), player => {
-      return player.id === peer;
+    _.forEach(this.remotePlayers.getChildren(), player => {
+      if(player.id === peer){
+        player.destroy();
+      };
     });
-
-    if (!_.isUndefined(remotePlayer)) {
-      this.remotePlayers.children.iterate(function(player) {
-        if(player.id === peer){
-          player.destroy();
-        }
-      });
-    }
   }
 
   /**
@@ -229,7 +223,7 @@ export default class LevelManager {
 
   _handlePlayerUpdate(remotePlayer, data) {
     var body = remotePlayer.body;
-    remotePlayer.facing = data.facing;
+    remotePlayer.rotation = data.rotation;
     remotePlayer.currentState = data.state;
     remotePlayer.x = data.x;
     remotePlayer.y = data.y;

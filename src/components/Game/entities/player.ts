@@ -51,7 +51,7 @@ class Player extends Entity {
   setup(scene) {
     super.setup(scene);
     this.cursors = this.scene.input.keyboard.createCursorKeys();
-    this.setCollideWorldBounds(true)
+    this.setCollideWorldBounds(false)
     if (this.body) {
       const body = this.body as Phaser.Physics.Arcade.Body;
       this._velocity = body.velocity;
