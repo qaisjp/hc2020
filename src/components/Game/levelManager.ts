@@ -10,6 +10,7 @@ export default class LevelManager {
   remotePlayers: any;
   _connectionStatusText: any;
   _entitiesGroup: any;
+  _blockGroup: Phaser.Physics.Arcade.StaticGroup;
   _physics: any;
   staticObjects: Phaser.Physics.Arcade.Group;
   localPlayer: any;
@@ -33,7 +34,9 @@ export default class LevelManager {
       return
     }
     console.log(scene);
+    // Init groups
     this._entitiesGroup = this.scene.add.group();
+    this._blockGroup = this.scene.physics.add.staticGroup();
     this._createWorld();
   }
 
@@ -56,7 +59,6 @@ export default class LevelManager {
     this.localPlayer.setup(this.scene);
     this.scene.cameras.main.startFollow(this.localPlayer);
     this._entitiesGroup.add(this.localPlayer);
-
     const wallunit = 250;
     const thick = WallThickness/2;
     const bits = [
@@ -77,9 +79,10 @@ export default class LevelManager {
     ]
     for (const b of bits) {
       const wall = new Wall(this.scene, b.x, b.y, b.length, b.angle);
-      wall.setup(this.scene);
-      this._entitiesGroup.add(wall);
+      wall.setup(this.scene, this._blockGroup);
+      this._blockGroup.add(wall);
     }
+    this.scene.physics.add.collider(this.localPlayer, this._blockGroup);
 
     // this._createMap();
     // this._createMapObjects();

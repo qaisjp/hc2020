@@ -1,6 +1,6 @@
 import Phaser from "phaser"
 
-class Entity extends Phaser.GameObjects.Sprite {
+class Entity extends Phaser.Physics.Arcade.Sprite {
     moveSpeed: number;
     facing: number;
         constructor(game, x, y, key, frame, moveSpeed = 0) {
