@@ -8,6 +8,7 @@
 
 import Entity from "./entity";
 import * as Const from "../constants";
+import Spear from "./spear";
 
 let PlayerStates = {
   Idle: 0,
@@ -29,8 +30,10 @@ class Player extends Entity {
   cursors: Phaser.Types.Input.Keyboard.CursorKeys | undefined;
   _velocity: any;
   _accel: any;
+  _clickDown: boolean;
+  createSpear: Function | undefined;
   isPlayer: boolean;
-  constructor(scene, x, y, id = "local", isPlayer = false) {
+  constructor(scene, x, y, id = "local", isPlayer = false, createSpear : Function | undefined = undefined) {
     super(scene, x, y, "playersheet", 0, /** Const.PLAYER_ACCEL */ 1);
     this.id = id;
     this.isPlayer = isPlayer;
@@ -45,6 +48,8 @@ class Player extends Entity {
     this._sprinting = false;
     this._turning = false;
     this._moving = [];
+    this._clickDown = false;
+    this.createSpear = createSpear;
     this._addAnimations([{ name: "walk", frames: [1, 2, 3] }], 8, true);
   }
 
@@ -73,6 +78,12 @@ class Player extends Entity {
         pointer.x + this.scene.cameras.main.scrollX,
         pointer.y + +this.scene.cameras.main.scrollY
       );
+      if (pointer.isDown) {
+        this._clickDown = true;
+      } else if (this._clickDown && this.createSpear) {
+        this.createSpear()
+        this._clickDown = false;
+      }
       // const directionRad = 0
       const direction = (directionRad / (2 * Math.PI)) * 360;
       // const direction = Math.atan((pointer.x - body.x) / (pointer.y - body.y)) / (2 * Math.PI) * 360;
@@ -85,7 +96,6 @@ class Player extends Entity {
       //   this.xSpeed = -this.speed * Math.sin(this.direction);
       //   this.ySpeed = -this.speed * Math.cos(this.direction);
       // }
-      console.log(direction);
       body.rotation = direction; // angle bullet with shooters rotation
       let localXAcceleration = 0;
       let localYAcceleration = 0;
