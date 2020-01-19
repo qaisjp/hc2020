@@ -18,6 +18,7 @@ export default class LevelManager {
   _connectionStatusText: any;
   _introText: any;
   _titleSprite: any;
+  _deadText: any;
   _startText: any;
   _instructionText: any;
   _malwareText: any;
@@ -68,6 +69,7 @@ export default class LevelManager {
     this._introText = new TextLabel(this.scene, -300, -200, "You've gone offline!", null, true, false, 0, 32);
     this._titleSprite = this.scene.add.sprite(0, -30, "malware")
     this._titleSprite.setScale(2)
+    this._deadText = new TextLabel(this.scene, -150, -200, "He's dead Jim!", null, true, false, 0, 32);
     this._startText = new TextLabel(this.scene, -270, 100, "Press space to start playing", null, true, true, 0, 20);
     this._instructionText = new TextLabel(
       this.scene,
@@ -149,13 +151,22 @@ export default class LevelManager {
           laser.destroy();
         }
       });
-      this.ghost = new Ghost(this.scene, p.body.x, p.body.y, "local");
-      this.ghost.setup(this.scene);
-      this.scene.cameras.main.startFollow(this.ghost);
-      this._entitiesGroup.add(this.ghost);
+
+      if (this.remotePlayers.length > 0) {
+        this.ghost = new Ghost(this.scene, p.body.x, p.body.y, "local");
+        this.ghost.setup(this.scene);
+        this.scene.cameras.main.startFollow(this.ghost);
+        this._entitiesGroup.add(this.ghost);
+      } else {
+        this.scene.add.existing(this._deadText);
+        this.scene.add.existing(this._startText);
+        this.scene.add.existing(this._instructionText);
+        this.scene.add.existing(this._malwareText);
+      }
       p.destroy();
       this.network.broadcastToPeers(Const.PeerJsMsgType.PLAYER_DEAD, {});
       this.dead = true;
+      console.log("dead called")
     });
     this.scene.physics.add.collider(this._spearGroup, this.arena._blockGroup, (spear, area) => {
       const s = spear as Spear;

@@ -4,7 +4,7 @@ import * as Const from "../constants";
 const DRAG = 1200;
 const JUMP_VEL = 300;
 const UPDATE_RATE = 30;
-const FIRE_RATE = 0.25;
+const FIRE_RATE = .15;
 
 class Monster extends Phaser.Physics.Arcade.Sprite {
   id: string;
