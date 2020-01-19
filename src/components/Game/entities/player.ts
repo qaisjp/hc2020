@@ -1,11 +1,3 @@
-/*
- * ===========================================================================
- * File: player.js
- * Author: Anthony Del Ciotto
- * Desc: TODO
- * ===========================================================================
- */
-
 import Entity from "./entity";
 import * as Const from "../constants";
 import Spear from "./spear";
@@ -21,7 +13,6 @@ let PlayerStates = {
 class Player extends Entity {
   id: string;
   jumpReleased: boolean;
-  _prevFacing: number;
   _jumping: boolean;
   _grounded: boolean;
   _sprinting: boolean;
@@ -33,17 +24,14 @@ class Player extends Entity {
   _clickDown: boolean;
   createSpear: Function | undefined;
   isPlayer: boolean;
-  hasSpear: boolean
-  constructor(scene, x, y, id = "local", isPlayer = false, createSpear : Function | undefined = undefined) {
-    super(scene, x, y, "playersheet", 0, /** Const.PLAYER_ACCEL */ 1);
+  hasSpear: boolean;
+  constructor(scene, x, y, id = "local", isPlayer = false, createSpear: Function | undefined = undefined) {
+    super(scene, x, y, "playersheet", 0);
     this.id = id;
     this.isPlayer = isPlayer;
     // this.maxSpeed = Const.PLAYER_MAX_SPEED;
     // this.currentState = PlayerStates.IDLE;
     this.jumpReleased = true;
-    this.facing = Phaser.RIGHT;
-
-    this._prevFacing = this.facing;
     this._jumping = false;
     this._grounded = false;
     this._sprinting = false;
@@ -57,7 +45,12 @@ class Player extends Entity {
 
   setup(scene) {
     super.setup(scene);
-    this.cursors = this.scene.input.keyboard.createCursorKeys();
+    this.cursors = this.scene.input.keyboard.addKeys({
+      up: Phaser.Input.Keyboard.KeyCodes.W,
+      down: Phaser.Input.Keyboard.KeyCodes.S,
+      left: Phaser.Input.Keyboard.KeyCodes.A,
+      right: Phaser.Input.Keyboard.KeyCodes.D
+    });
     this.setCollideWorldBounds(false);
     if (this.body) {
       const body = this.body as Phaser.Physics.Arcade.Body;
@@ -83,7 +76,7 @@ class Player extends Entity {
       if (pointer.isDown) {
         this._clickDown = true;
       } else if (this._clickDown && this.createSpear && this.hasSpear) {
-        this.createSpear()
+        this.createSpear();
         this.hasSpear = false;
         this._clickDown = false;
       } else {
