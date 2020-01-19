@@ -18,7 +18,7 @@ export default class LevelManager {
   _connectionStatusText: any;
   _introText: any;
   _titleSprite: any;
-  _deadText: any;
+  _deadText: TextLabel;
   _startText: any;
   _instructionText: any;
   _malwareText: any;
@@ -96,12 +96,20 @@ export default class LevelManager {
     this.scene.add.existing(this._introText);
     this.scene.add.existing(this._startText);
     this.scene.add.existing(this._instructionText);
+    this.scene.add.existing(this._deadText);
+    this._deadText.alpha = 0;
+    this._deadText.depth = 20;
     this.scene.add.existing(this._malwareText);
     this.scene.cameras.main.centerOn(0, 100);
   }
 
   shutdown() {
     this.remotePlayers.destroy();
+    // this.gameStarted = false;
+    // this.spawning = false;
+    setTimeout(() => {
+      window.location.href = ""
+    }, 700);
   }
 
   _createWorld() {
@@ -158,10 +166,8 @@ export default class LevelManager {
         this.scene.cameras.main.startFollow(this.ghost);
         this._entitiesGroup.add(this.ghost);
       } else {
-        this.scene.add.existing(this._deadText);
-        this.scene.add.existing(this._startText);
-        this.scene.add.existing(this._instructionText);
-        this.scene.add.existing(this._malwareText);
+        this._deadText.alpha = 1;
+        this.shutdown();
       }
       p.destroy();
       this.network.broadcastToPeers(Const.PeerJsMsgType.PLAYER_DEAD, {});
@@ -308,6 +314,7 @@ export default class LevelManager {
               this._startText.destroy();
               this._introText.destroy();
               this._titleSprite.destroy();
+              this._deadText.alpha = 0;
               this._createWorld();
             }
             break;
