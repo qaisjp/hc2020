@@ -418,7 +418,7 @@ export default class LevelManager {
   }
 
   _onData(type, data) {
-    if (this.remotePlayers) {
+    if (this.remotePlayers.children) {
       var remotePlayer = _.find(this.remotePlayers.getChildren(), player => {
         return player.id === data.from;
       });
