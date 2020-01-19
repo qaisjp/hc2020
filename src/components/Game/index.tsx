@@ -2,6 +2,8 @@ import React, { useRef, useEffect, useState } from "react";
 import Phaser from "phaser";
 import logoImg from "../../imgs/img.jpg";
 import spearImg from "../../imgs/spear_gray.png";
+import laserImg from "../../imgs/laser.png";
+import ghostImg from "../../imgs/ghost.png";
 import malwareImg from "../../imgs/malware_gladiator.png";
 import avastImg from "../../imgs/avast_logo_light.png";
 import LevelManager from "./levelManager";
@@ -16,7 +18,9 @@ class MyScene extends Phaser.Scene {
   preload() {
     this.load.image("logo", logoImg);
     this.load.image("spear", spearImg);
+    this.load.image("laser", laserImg);
     this.load.image("avast", avastImg);
+    this.load.image("ghost", ghostImg);
     this.load.image("malware", malwareImg);
     this.load.bitmapFont("plumber_bros", "res/fonts/plumber_bros_gray.png", "res/fonts/plumber_bros.xml");
     this.load.multiatlas('monster', 'res/monster.json', 'res');
@@ -63,7 +67,7 @@ const Game = () => {
       physics: {
         default: "arcade",
         arcade: {
-          debug: true,
+          debug: false,
           fps: 60
         }
       }

@@ -43,6 +43,9 @@ export default class LevelManager {
   canSpawn: boolean;
   arena: Arena | undefined;
   waveNumber: number;
+  laCollider: Phaser.Physics.Arcade.Collider | undefined;
+  llCollider: Phaser.Physics.Arcade.Collider | undefined;
+  slCollider: Phaser.Physics.Arcade.Collider | undefined;
   constructor(game: Phaser.Game, scene: Phaser.Scene) {
     this.game = game;
     this.scene = scene;
@@ -109,9 +112,9 @@ export default class LevelManager {
     this.remotePlayers.destroy();
     // this.gameStarted = false;
     // this.spawning = false;
-    setTimeout(() => {
-      window.location.href = ""
-    }, 700);
+    // setTimeout(() => {
+    //   window.location.href = "";
+    // }, 700);
   }
 
   _createWorld() {
@@ -122,25 +125,13 @@ export default class LevelManager {
     this.network.addListener(Const.PeerJsEvents.OPEN, this._onOpen, this);
     this.network.addListener(Const.PeerJsEvents.DATA, this._onData, this);
     this.network.addListener(Const.PeerJsEvents.CLOSE, this._onClose, this);
-    const createSpear = () => {
-      const ID = uuidv4();
-      const rotation = this.localPlayer.rotation;
-      const spear = new Spear(this.scene, this.localPlayer.x, this.localPlayer.y, ID, rotation);
-      this.network.broadcastToPeers(Const.PeerJsMsgType.SPEAR_CREATED, {
-        id: ID,
-        rotation: spear._angle,
-        x: Math.round(this.localPlayer.x),
-        y: Math.round(this.localPlayer.y)
-      });
-      spear.setup(this.scene, this._spearGroup);
-    };
-    this.localPlayer = new Player(this.scene, 0, -185, "local", true, createSpear);
+    this.localPlayer = new Player(this.scene, 0, -185, "local", true, this.createSpear);
     this.localPlayer.setup(this.scene);
     this.scene.cameras.main.startFollow(this.localPlayer);
     this._entitiesGroup.add(this.localPlayer);
     this.arena = new Arena(this.scene, 0, 300);
     this.arena.setup(this.scene);
-    this.scene.physics.add.collider(this.localPlayer, this.arena._blockGroup);
+    this.laCollider = this.scene.physics.add.collider(this.localPlayer, this.arena._blockGroup);
     this.scene.physics.add.collider(this._monsterGroup, this.arena._blockGroup);
     this.scene.physics.add.collider(this._laserGroup, this.arena._blockGroup, (laser, area) => {
       const l = laser as Laser;
@@ -150,7 +141,7 @@ export default class LevelManager {
         }
       });
     });
-    this.scene.physics.add.overlap(this._laserGroup, this.localPlayer, (laser, player) => {
+    this.llCollider = this.scene.physics.add.overlap(this._laserGroup, this.localPlayer, (laser, player) => {
       const l = laser as Laser;
       const p = player as Player;
       if (p.id !== "local") {
@@ -169,9 +160,14 @@ export default class LevelManager {
         this._entitiesGroup.add(this.ghost);
       } else {
         this._deadText.alpha = 1;
+        this.network.broadcastToPeers(Const.PeerJsMsgType.RESTART, {});
         this.shutdown();
       }
-      p.destroy();
+      _.forEach(this._entitiesGroup.getChildren(), pl => {
+        if (pl && pl.id === "local") {
+          pl.destroy();
+        }
+      });
       this.network.broadcastToPeers(Const.PeerJsMsgType.PLAYER_DEAD, {});
       this.dead = true;
       console.log("dead called");
@@ -199,7 +195,7 @@ export default class LevelManager {
         }
       });
     });
-    this.scene.physics.add.collider(this._spearGroup, this.localPlayer, (spear, player) => {
+    this.slCollider = this.scene.physics.add.collider(this._spearGroup, this.localPlayer, (spear, player) => {
       const s = spear as Spear;
       const p = player as Player;
       if (p.hasSpear || p.id !== "local") {
@@ -250,6 +246,19 @@ export default class LevelManager {
       this._broadcastMonstersUpdate();
     }
   }
+
+  createSpear = () => {
+    const ID = uuidv4();
+    const rotation = this.localPlayer.rotation;
+    const spear = new Spear(this.scene, this.localPlayer.x, this.localPlayer.y, ID, rotation);
+    this.network.broadcastToPeers(Const.PeerJsMsgType.SPEAR_CREATED, {
+      id: ID,
+      rotation: spear._angle,
+      x: Math.round(this.localPlayer.x),
+      y: Math.round(this.localPlayer.y)
+    });
+    spear.setup(this.scene, this._spearGroup);
+  };
 
   createLaser = monster => {
     const ID = uuidv4();
@@ -396,9 +405,11 @@ export default class LevelManager {
   }
 
   _onData(type, data) {
-    var remotePlayer = _.find(this.remotePlayers.getChildren(), player => {
-      return player.id === data.from;
-    });
+    if (this.remotePlayers) {
+      var remotePlayer = _.find(this.remotePlayers.getChildren(), player => {
+        return player.id === data.from;
+      });
+    }
     switch (type) {
       case Const.PeerJsMsgType.HELLO:
         this._handleHello(data);
@@ -431,10 +442,17 @@ export default class LevelManager {
         this._handleDeadMonster(data);
         break;
       case Const.PeerJsMsgType.DOOR_OPEN:
+        // this._handleSelfRessurect();
         this._handleDoor(true);
         break;
       case Const.PeerJsMsgType.DOOR_CLOSE:
         this._handleDoor(false);
+        break;
+      case Const.PeerJsMsgType.RESTART:
+        this.shutdown();
+        break;
+      case Const.PeerJsMsgType.RESSURECT:
+        this._handleRessurect(data);
     }
   }
 
@@ -580,9 +598,88 @@ export default class LevelManager {
   }
   _handleDoor(open) {
     if (this.arena) {
-      for (const d of this.arena.doors) {
-        d.open();
+      if (open) {
+        for (const d of this.arena.doors) {
+          d.open();
+        }
+      } else {
+        for (const d of this.arena.doors) {
+          d.close();
+        }
       }
     }
+  }
+  _handleSelfRessurect() {
+    console.log("handlingSelfRessurect");
+    if (this.ghost && this.arena) {
+      console.log("ibn");
+      this.dead = false;
+      this.ghost.destroy();
+      this.localPlayer = new Player(this.scene, 0, -185, "local", true, this.createSpear);
+      this.localPlayer.setup(this.scene);
+      this.scene.cameras.main.startFollow(this.localPlayer);
+      this._entitiesGroup.add(this.localPlayer);
+      this.network.broadcastToPeers(Const.PeerJsMsgType.RESSURECT, {
+        x: this.localPlayer.x,
+        y: this.localPlayer.y
+      });
+      this.laCollider?.destroy();
+      this.llCollider?.destroy();
+      this.slCollider?.destroy();
+      this.laCollider = this.scene.physics.add.collider(this.localPlayer, this.arena._blockGroup);
+      this.llCollider = this.scene.physics.add.overlap(this._laserGroup, this.localPlayer, (laser, player) => {
+        const l = laser as Laser;
+        const p = player as Player;
+        if (p.id !== "local") {
+          return;
+        }
+        _.forEach(this._laserGroup.getChildren(), laser => {
+          if (laser && laser.id === l.id) {
+            laser.destroy();
+          }
+        });
+
+        if (this.remotePlayers.children.size > 0) {
+          this.ghost = new Ghost(this.scene, p.body.x, p.body.y, "local");
+          this.ghost.setup(this.scene);
+          this.scene.cameras.main.startFollow(this.ghost);
+          // this._entitiesGroup.add(this.ghost);
+        } else {
+          this._deadText.alpha = 1;
+          this.network.broadcastToPeers(Const.PeerJsMsgType.RESTART, {});
+          this.shutdown();
+        }
+        _.forEach(this._entitiesGroup.getChildren(), pl => {
+          if (pl && pl.id === "local") {
+            pl.destroy();
+          }
+        });
+        this.network.broadcastToPeers(Const.PeerJsMsgType.PLAYER_DEAD, {});
+        this.dead = true;
+        console.log("dead called");
+      });
+      this.slCollider = this.scene.physics.add.collider(this._spearGroup, this.localPlayer, (spear, player) => {
+        const s = spear as Spear;
+        const p = player as Player;
+        if (p.hasSpear || p.id !== "local") {
+          return;
+        }
+        _.forEach(this._spearGroup.getChildren(), spear => {
+          if (spear && spear.id === s.id) {
+            spear.destroy();
+          }
+        });
+        this.network.broadcastToPeers(Const.PeerJsMsgType.SPEAR_PICKED_UP, {
+          id: s.id
+        });
+        this.localPlayer.hasSpear = true;
+      });
+    }
+  }
+  _handleRessurect(data) {
+    var newPlayer = new Player(this.scene, data.x, data.y, data.from);
+    newPlayer.setup(this.scene);
+    this.remotePlayers.add(newPlayer);
+    this._entitiesGroup.add(newPlayer);
   }
 }

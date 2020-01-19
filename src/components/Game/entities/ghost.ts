@@ -18,6 +18,8 @@ class Ghost extends Entity {
 
   setup(scene) {
     super.setup(scene);
+    this.setScale(0.2);
+    this.setAlpha(0.5)
     this.cursors = this.scene.input.keyboard.addKeys({
       up: Phaser.Input.Keyboard.KeyCodes.W,
       down: Phaser.Input.Keyboard.KeyCodes.S,
