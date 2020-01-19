@@ -10,17 +10,17 @@ class Spear extends Phaser.Physics.Arcade.Sprite {
   _velocity: any;
   _initSpeed: number;
   _maxSpeed: number;
-  _enemyHit: boolean;
   _wallHit: boolean;
-  constructor(scene, x, y, id, angle = 0) {
+  _monstersHit: Phaser.GameObjects.Group
+  constructor(scene : Phaser.Scene, x, y, id, angle = 0) {
     console.log("SPEAR:", x, y, angle);
     super(scene, x, y, "spear", 0);
     this.id = id;
     this._angle = angle;
     this._initSpeed = INIT_SPEED;
     this._maxSpeed = 6000;
-    this._enemyHit = false;
     this._wallHit = false;
+    this._monstersHit = scene.add.group()
   }
 
   setup(scene: Phaser.Scene, group: Phaser.GameObjects.Group) {
@@ -47,11 +47,7 @@ class Spear extends Phaser.Physics.Arcade.Sprite {
     if (this.body) {
       const body = this.body as Phaser.Physics.Arcade.Body;
       body.rotation = (this._angle / (2 * Math.PI)) * 360 + 90;
-      if (this._enemyHit) {
-        var speed = body.maxSpeed;
-        body.setVelocityX(speed * Math.cos(this._angle));
-        body.setVelocityY(speed * Math.sin(this._angle));
-      } else if (this._wallHit) {
+      if (this._wallHit) {
         body.setVelocityX(0);
         body.setVelocityY(0);
         body.setImmovable();
@@ -62,6 +58,7 @@ class Spear extends Phaser.Physics.Arcade.Sprite {
         }
         this._velocity = body.velocity;
       }
+      this._monstersHit.setXY(body.position.x, body.position.y)
     }
   }
 
