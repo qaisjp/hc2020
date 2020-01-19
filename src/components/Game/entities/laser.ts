@@ -1,6 +1,7 @@
 import Phaser from "phaser";
 
-const INIT_SPEED = 1500;
+// const INIT_SPEED = 1500;
+const INIT_SPEED = 300;
 
 
 class Laser extends Phaser.Physics.Arcade.Sprite {
@@ -19,8 +20,8 @@ class Laser extends Phaser.Physics.Arcade.Sprite {
     scene.physics.world.enable(this);
     scene.add.existing(this);
     group.add(this);
-    this.setSize(50, 50);
-    this.setDisplaySize(40, 40);
+    this.setSize(20, 20);
+    this.setDisplaySize(20, 20);
     if (this.body) {
       const body = this.body as Phaser.Physics.Arcade.Body;
       // this.body.setSize(this.), 40);
