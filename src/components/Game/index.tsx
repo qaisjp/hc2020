@@ -19,6 +19,7 @@ class MyScene extends Phaser.Scene {
     this.load.image("avast", avastImg);
     this.load.image("malware", malwareImg);
     this.load.bitmapFont("plumber_bros", "res/fonts/plumber_bros_gray.png", "res/fonts/plumber_bros.xml");
+    this.load.multiatlas('monster', 'res/monster.json', 'res');
   }
 
   update() {

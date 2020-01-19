@@ -1,0 +1,62 @@
+{
+	"textures": [
+		{
+			"image": "monster.png",
+			"format": "RGBA8888",
+			"size": {
+				"w": 607,
+				"h": 294
+			},
+			"scale": 1,
+			"frames": [
+				{
+					"filename": "pixil-frame-0(3).png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 320,
+						"h": 320
+					},
+					"spriteSourceSize": {
+						"x": 9,
+						"y": 9,
+						"w": 311,
+						"h": 292
+					},
+					"frame": {
+						"x": 1,
+						"y": 1,
+						"w": 311,
+						"h": 292
+					}
+				},
+				{
+					"filename": "pixil-frame-1(1).png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 320,
+						"h": 320
+					},
+					"spriteSourceSize": {
+						"x": 9,
+						"y": 9,
+						"w": 292,
+						"h": 292
+					},
+					"frame": {
+						"x": 314,
+						"y": 1,
+						"w": 292,
+						"h": 292
+					}
+				}
+			]
+		}
+	],
+	"meta": {
+		"app": "https://www.codeandweb.com/texturepacker",
+		"version": "3.0",
+		"smartupdate": "$TexturePacker:SmartUpdate:9a02829b63b260fb1b711e0509bfedd9:a650530458217a9a4e76630f40ce528b:f74f4c97ee317a37ce4c989b2dfd3b2a$"
+	}
+}

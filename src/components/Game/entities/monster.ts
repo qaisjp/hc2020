@@ -4,7 +4,7 @@ import * as Const from "../constants";
 const DRAG = 1200;
 const JUMP_VEL = 300;
 const UPDATE_RATE = 30;
-const FIRE_RATE = .25;
+const FIRE_RATE = 0.25;
 
 class Monster extends Phaser.Physics.Arcade.Sprite {
   id: string;
@@ -15,16 +15,26 @@ class Monster extends Phaser.Physics.Arcade.Sprite {
   _numRand: number;
 
   constructor(scene, x, y, id) {
-    super(scene, x, y, "playersheet", 0);
+    super(scene, x, y, "monster", 0);
+    this.scene.anims.create({
+      key: "walk",
+      frames: [
+        { key: "monster", frame: "pixil-frame-0(3).png" },
+        { key: "monster", frame: "pixil-frame-1(1).png" }
+      ],
+      frameRate: 2,
+      repeat: -1
+    });
     this.id = id;
     this.isHit = false;
     this._rand = new Phaser.Math.RandomDataGenerator([id]);
-    console.log(this._rand)
     this._numUpdates = 0;
     this._numRand = 0;
   }
 
   setup(scene, createLaser) {
+    this.setScale(0.3, 0.3);
+    this.anims.play("walk");
     this.createLaser = createLaser;
     scene.physics.world.enable(this);
     scene.add.existing(this);
@@ -39,7 +49,7 @@ class Monster extends Phaser.Physics.Arcade.Sprite {
   }
 
   catchUp() {
-    for(const _ of [...Array(this._numRand).keys()]){
+    for (const _ of [...Array(this._numRand).keys()]) {
       this._rand.frac();
     }
   }
@@ -47,7 +57,7 @@ class Monster extends Phaser.Physics.Arcade.Sprite {
   update() {
     if (this.body) {
       if (this.isHit) {
-        return
+        return;
       }
       const body = this.body as Phaser.Physics.Arcade.Body;
       if (this._numUpdates % UPDATE_RATE === 0) {
@@ -56,14 +66,14 @@ class Monster extends Phaser.Physics.Arcade.Sprite {
         this._numRand = this._numRand + 1;
 
         var walk_rate = 1.0 - FIRE_RATE;
-        if (rand < (walk_rate / 4.0)) {
-          body.setVelocityX(-JUMP_VEL)
-        } else if (rand < (2 * walk_rate / 4.0)) {
-          body.setVelocityX(JUMP_VEL)
-        } else if (rand < (3 * walk_rate / 4.0)) {
-          body.setVelocityY(JUMP_VEL)
-        } else if (rand < (walk_rate)) {
-          body.setVelocityY(-JUMP_VEL)
+        if (rand < walk_rate / 4.0) {
+          body.setVelocityX(-JUMP_VEL);
+        } else if (rand < (2 * walk_rate) / 4.0) {
+          body.setVelocityX(JUMP_VEL);
+        } else if (rand < (3 * walk_rate) / 4.0) {
+          body.setVelocityY(JUMP_VEL);
+        } else if (rand < walk_rate) {
+          body.setVelocityY(-JUMP_VEL);
         } else if (this.createLaser) {
           this.createLaser(this);
         }
