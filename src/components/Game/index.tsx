@@ -1,6 +1,7 @@
 import React, { useRef, useEffect, useState } from "react";
 import Phaser from "phaser";
 import logoImg from "../../imgs/img.jpg";
+import spearImg from "../../imgs/spear.png";
 import LevelManager from "./levelManager";
 
 class MyScene extends Phaser.Scene {
@@ -10,6 +11,7 @@ class MyScene extends Phaser.Scene {
   }
   preload() {
     this.load.image("logo", logoImg);
+    this.load.image("spear", spearImg);
     this.load.bitmapFont("plumber_bros", "res/fonts/plumber_bros.png", "res/fonts/plumber_bros.xml");
   }
 

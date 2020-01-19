@@ -27,8 +27,11 @@ class Spear extends Phaser.Physics.Arcade.Sprite {
     scene.physics.world.enable(this);
     scene.add.existing(this);
     group.add(this);
+    this.setSize(50, 50);
+    this.setDisplaySize(40, 40);
     if (this.body) {
       const body = this.body as Phaser.Physics.Arcade.Body;
+      // this.body.setSize(this.), 40);
       body.rotation = (this._angle / (2 * Math.PI)) * 360;
       var speed = this._initSpeed;
       body.setVelocity(speed * Math.cos(this._angle), speed * Math.sin(this._angle));
@@ -43,7 +46,7 @@ class Spear extends Phaser.Physics.Arcade.Sprite {
   update() {
     if (this.body) {
       const body = this.body as Phaser.Physics.Arcade.Body;
-      body.rotation = (this._angle / (2 * Math.PI)) * 360;
+      body.rotation = (this._angle / (2 * Math.PI)) * 360 + 90;
       if (this._wallHit) {
         body.setVelocityX(0);
         body.setVelocityY(0);
