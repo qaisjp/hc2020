@@ -6,6 +6,7 @@ import _ from "lodash";
 import Player from "./entities/player";
 import Spear from "./entities/spear";
 import Monster from "./entities/monster";
+import Laser from "./entities/laser";
 const uuidv4 = require("uuid/v4");
 
 export default class LevelManager {
@@ -145,14 +146,21 @@ export default class LevelManager {
     // this._updateCollision();
     this._updateEntities();
     if (this.leader) {
+      const createLaser = (monster) => {
+        const ID = uuidv4();
+        const rotation = monster.rotation;
+        const laser = new Laser(this.scene, monster.x, monster.y, ID, rotation);
+
+        laser.setup(this.scene, this._spearGroup);
+      };
       // SPAWN MONSTERS HERE
       if (this._monsterGroup.getChildren().length === 0) {
         const m = new Monster(this.scene, -40, -80, uuidv4());
-        m.setup(this.scene);
+        m.setup(this.scene, createLaser);
         this._monsterGroup.add(m);
 
         const m2 = new Monster(this.scene, -80, -120, uuidv4());
-        m2.setup(this.scene);
+        m2.setup(this.scene, createLaser);
         this._monsterGroup.add(m2);
       }
     }
