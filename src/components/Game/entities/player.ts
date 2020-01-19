@@ -22,6 +22,8 @@ class Player extends Entity {
   _velocity: any;
   _accel: any;
   _clickDown: boolean;
+  isNew: boolean;
+  currentScale: number;
   createSpear: Function | undefined;
   isPlayer: boolean;
   hasSpear: boolean;
@@ -40,6 +42,8 @@ class Player extends Entity {
     this._clickDown = false;
     this.createSpear = createSpear;
     this.hasSpear = true;
+    this.isNew = true;
+    this.currentScale = 2.8;
     this._addAnimations([{ name: "walk", frames: [1, 2, 3] }], 8, true);
   }
 
@@ -64,6 +68,16 @@ class Player extends Entity {
   }
 
   update() {
+    if (this.isNew) {
+      this.scale = this.currentScale;
+      this.currentScale -= 0.05;
+      if (this.currentScale <= 1.0) {
+        this.scale = 1;
+        this.isNew = false;
+        this.scene.cameras.main.shake(200, 0.005);
+      }
+      return;
+    }
     if (this.cursors && this.body && this.isPlayer) {
       const body = this.body as Phaser.Physics.Arcade.Body;
       const pointer = this.scene.input.activePointer;
