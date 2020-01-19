@@ -119,7 +119,7 @@ export default class LevelManager {
       });
       spear.setup(this.scene, this._spearGroup);
     };
-    this.localPlayer = new Player(this.scene, 32, 100, "local", true, createSpear);
+    this.localPlayer = new Player(this.scene, 0, -185, "local", true, createSpear);
     this.localPlayer.setup(this.scene);
     this.scene.cameras.main.startFollow(this.localPlayer);
     this._entitiesGroup.add(this.localPlayer);
