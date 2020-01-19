@@ -124,6 +124,18 @@ export default class LevelManager {
       m.isHit = true;
       m.body.mass = 0;
       s._monstersHit.add(m);
+      this.scene.time.delayedCall(2000, f => {
+        if (this.leader) {
+          _.forEach(this._monsterGroup.getChildren(), monster => {
+            if (monster && monster.id === m.id) {
+              monster.destroy();
+              this.network.broadcastToPeers(Const.PeerJsMsgType.DEAD_MONSTER, {
+                id: m.id
+              });
+            }
+          });
+        }
+      });
     });
     this.scene.physics.add.collider(this._spearGroup, this.localPlayer, (spear, player) => {
       const s = spear as Spear;
@@ -296,6 +308,8 @@ export default class LevelManager {
       case Const.PeerJsMsgType.PLAYER_DEAD:
         this._handlePlayerDead(remotePlayer);
         break;
+      case Const.PeerJsMsgType.DEAD_MONSTER:
+        this._handleDeadMonster(data);
     }
   }
 
@@ -429,6 +443,13 @@ export default class LevelManager {
     _.forEach(this.remotePlayers.getChildren(), player => {
       if (player && player.id === remotePlayer.id) {
         player.destroy();
+      }
+    });
+  }
+  _handleDeadMonster(data) {
+    _.forEach(this._monsterGroup.getChildren(), monster => {
+      if (monster && monster.id === data.id) {
+        monster.destroy();
       }
     });
   }

@@ -1,7 +1,7 @@
 import Phaser from "phaser";
 
 // const INIT_SPEED = 1500;
-const INIT_SPEED = 300;
+const INIT_SPEED = 100;
 
 
 class Laser extends Phaser.Physics.Arcade.Sprite {
