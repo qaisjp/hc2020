@@ -19,7 +19,9 @@ export const PeerJsMsgType = {
   SPEAR_PICKED_UP: 6,
   MONSTERS_UPDATE: 7,
   PLAYER_DEAD: 8,
-  DEAD_MONSTER: 9
+  DEAD_MONSTER: 9,
+  DOOR_OPEN: 10,
+  DOOR_CLOSE: 11
 };
 export const NETWORK_STATUS_CLEAR_TIME = 5000;
 export const GAME_FONT = "plumber_bros";

@@ -40,6 +40,7 @@ export default class LevelManager {
   ghost: any;
   gameStarted: boolean;
   spawning: boolean;
+  canSpawn: boolean;
   arena: Arena | undefined;
   waveNumber: number;
   constructor(game: Phaser.Game, scene: Phaser.Scene) {
@@ -59,6 +60,7 @@ export default class LevelManager {
     };
     this.gameStarted = false;
     this.spawning = false;
+    this.canSpawn = false;
     // Init groups
     this._entitiesGroup = this.scene.add.group();
     this._spearGroup = this.scene.add.group();
@@ -67,8 +69,8 @@ export default class LevelManager {
     this._blockGroup = this.scene.physics.add.staticGroup();
     this.remotePlayers = this.scene.add.group();
     this._introText = new TextLabel(this.scene, -300, -200, "You've gone offline!", null, true, false, 0, 32);
-    this._titleSprite = this.scene.add.sprite(0, -30, "malware")
-    this._titleSprite.setScale(2)
+    this._titleSprite = this.scene.add.sprite(0, -30, "malware");
+    this._titleSprite.setScale(2);
     this._deadText = new TextLabel(this.scene, -190, -200, "He's dead Jim!", null, true, false, 0, 32);
     this._startText = new TextLabel(this.scene, -270, 100, "Press space to start playing", null, true, true, 0, 20);
     this._instructionText = new TextLabel(
@@ -166,7 +168,7 @@ export default class LevelManager {
       p.destroy();
       this.network.broadcastToPeers(Const.PeerJsMsgType.PLAYER_DEAD, {});
       this.dead = true;
-      console.log("dead called")
+      console.log("dead called");
     });
     this.scene.physics.add.collider(this._spearGroup, this.arena._blockGroup, (spear, area) => {
       const s = spear as Spear;
@@ -178,7 +180,7 @@ export default class LevelManager {
       m.isHit = true;
       m.body.mass = 0;
       s.onHitMonster(m);
-      this.scene.time.delayedCall(2000, f => {
+      this.scene.time.delayedCall(666, f => {
         if (this.leader) {
           _.forEach(this._monsterGroup.getChildren(), monster => {
             if (monster && monster.id === m.id) {
@@ -284,20 +286,42 @@ export default class LevelManager {
     if (this.gameStarted) {
       // this._updateCollision();
       this._updateEntities();
-      if (this.leader && this.spawning) {
-        // SPAWN MONSTERS HERE
-        if (this._monsterGroup.getChildren().length === 0 && this.arena) {
-          const nmbrMonsters = WAVES[this.waveNumber];
-          this.waveNumber++;
-          for (const step of [...Array(nmbrMonsters)].keys()) {
-            const ds = this.arena.doors;
-            const OFFSET = 120;
-            this.createMonster(ds[0].x + OFFSET, ds[0].y, step !== 0);
-            this.createMonster(ds[1].x - OFFSET, ds[1].y, step !== 0);
-            this.createMonster(ds[2].x, ds[2].y + OFFSET, step !== 0);
-            this.createMonster(ds[3].x, ds[3].y - OFFSET, step !== 0);
-          }
+      if (
+        this.leader &&
+        this.canSpawn &&
+        this.arena &&
+        !this.spawning &&
+        this._monsterGroup.getChildren().length === 0 &&
+        this.arena
+      ) {
+        this.spawning = true;
+        for (const d of this.arena.doors) {
+          d.open();
         }
+
+        this.network.broadcastToPeers(Const.PeerJsMsgType.DOOR_OPEN, {});
+        // SPAWN MONSTERS HERE
+
+        const nmbrMonsters = WAVES[this.waveNumber];
+        this.waveNumber++;
+        for (const step of [...Array(nmbrMonsters)].keys()) {
+          const ds = this.arena.doors;
+          const OFFSET = 120;
+          this.createMonster(ds[0].x + OFFSET, ds[0].y);
+          this.createMonster(ds[1].x - OFFSET, ds[1].y);
+          this.createMonster(ds[2].x, ds[2].y + OFFSET);
+          this.createMonster(ds[3].x, ds[3].y - OFFSET);
+        }
+
+        this.scene.time.delayedCall(2000, f => {
+          this.network.broadcastToPeers(Const.PeerJsMsgType.DOOR_CLOSE, {});
+          this.spawning = false;
+          if (this.arena) {
+            for (const d of this.arena.doors) {
+              d.close();
+            }
+          }
+        });
       }
     } else {
       this.scene.input.keyboard.on("keydown", event => {
@@ -357,17 +381,8 @@ export default class LevelManager {
     }
     this._connectionStatusText.setText(`connected, id: ${id}, leader: ${this.leader}`);
     if (this.arena) {
-      if (this.leader) {
-        for (const d of this.arena.doors) {
-          d.open();
-        }
-      } else {
-        for (const d of this.arena.doors) {
-          d.openImmediate();
-        }
-      }
       this.scene.time.delayedCall(2000, f => {
-        this.spawning = true;
+        this.canSpawn = true;
       });
     }
     // this.scene.time.delayedCall(Const.NETWORK_STATUS_CLEAR_TIME, f => (this._connectionStatusText.visible = false));
@@ -407,6 +422,12 @@ export default class LevelManager {
         break;
       case Const.PeerJsMsgType.DEAD_MONSTER:
         this._handleDeadMonster(data);
+        break;
+      case Const.PeerJsMsgType.DOOR_OPEN:
+        this._handleDoor(true);
+        break;
+      case Const.PeerJsMsgType.DOOR_CLOSE:
+        this._handleDoor(false);
     }
   }
 
@@ -549,5 +570,12 @@ export default class LevelManager {
         monster.destroy();
       }
     });
+  }
+  _handleDoor(open) {
+    if (this.arena) {
+      for (const d of this.arena.doors) {
+        d.open();
+      }
+    }
   }
 }

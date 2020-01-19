@@ -13,28 +13,55 @@ class Monster extends Phaser.Physics.Arcade.Sprite {
   _rand: Phaser.Math.RandomDataGenerator;
   _numUpdates: number;
   _numRand: number;
+  playingHit: boolean;
 
   constructor(scene, x, y, id) {
     super(scene, x, y, "monster", 0);
     this.scene.anims.create({
       key: "walk",
       frames: [
-        { key: "monster", frame: "pixil-frame-0(3).png" },
-        { key: "monster", frame: "pixil-frame-1(1).png" }
+        { key: "monster", frame: "pixil-frame-0.png" },
+        { key: "monster", frame: "pixil-frame-1.png" }
       ],
       frameRate: 2,
       repeat: -1
+    });
+    this.scene.anims.create({
+      key: "appear",
+      frames: [
+        { key: "monster", frame: "pixil-frame-2.png" },
+        { key: "monster", frame: "pixil-frame-3.png" },
+        { key: "monster", frame: "pixil-frame-4.png" },
+        { key: "monster", frame: "pixil-frame-5.png" },
+      ],
+      frameRate: 6,
+      repeat: 0
+    });
+    this.scene.anims.create({
+      key: "death",
+      frames: [
+        { key: "monster", frame: "pixil-frame-7.png" },
+        { key: "monster", frame: "pixil-frame-8.png" },
+        { key: "monster", frame: "pixil-frame-9.png" },
+        { key: "monster", frame: "pixil-frame-10.png" },
+      ],
+      frameRate: 6,
+      repeat: 0
     });
     this.id = id;
     this.isHit = false;
     this._rand = new Phaser.Math.RandomDataGenerator([id]);
     this._numUpdates = 0;
+    this.playingHit = false;
     this._numRand = 0;
   }
 
   setup(scene, createLaser) {
     this.setScale(0.3, 0.3);
-    this.anims.play("walk");
+    this.anims.play("appear");
+    this.scene.time.delayedCall(666, f => {
+      this.anims.play("walk")
+    });
     this.createLaser = createLaser;
     scene.physics.world.enable(this);
     scene.add.existing(this);
@@ -56,7 +83,9 @@ class Monster extends Phaser.Physics.Arcade.Sprite {
 
   update() {
     if (this.body) {
-      if (this.isHit) {
+      if (this.isHit && !this.playingHit) {
+        this.anims.play("death")
+        this.playingHit = true
         return;
       }
       const body = this.body as Phaser.Physics.Arcade.Body;
