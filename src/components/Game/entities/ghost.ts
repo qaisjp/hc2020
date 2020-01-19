@@ -37,14 +37,8 @@ class Ghost extends Entity {
   update() {
     if (this.cursors && this.body) {
       const body = this.body as Phaser.Physics.Arcade.Body;
-      const pointer = this.scene.input.activePointer;
-      const directionRad = Phaser.Math.Angle.Between(
-        body.x,
-        body.y,
-        pointer.x + this.scene.cameras.main.scrollX,
-        pointer.y + +this.scene.cameras.main.scrollY
-      );
-      const direction = (directionRad / (2 * Math.PI)) * 360;
+      // const pointer = this.scene.input.activePointer;
+      // const directionRad = Phaser.Math.Angle.Between(
       // const direction = Math.atan((pointer.x - body.x) / (pointer.y - body.y)) / (2 * Math.PI) * 360;
       //some light randomness to the bullet angle
       // Calculate X and y velocity of bullet to moves it from shooter to target
@@ -54,8 +48,7 @@ class Ghost extends Entity {
       // } else {
       //   this.xSpeed = -this.speed * Math.sin(this.direction);
       //   this.ySpeed = -this.speed * Math.cos(this.direction);
-      // }
-      body.rotation = direction; // angle bullet with shooters rotation
+      // } // angle bullet with shooters rotatio
       let localXAcceleration = 0;
       let localYAcceleration = 0;
       if (this.cursors.left && this.cursors.left.isDown) {
