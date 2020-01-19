@@ -1,7 +1,8 @@
 import PeerNetwork from "./network/peer_network";
 import { TextLabel } from "./gui/textLabel";
 import Wall, { WallThickness } from './entities/arena/wall';
-import Door from './entities/arena/door';
+import VerticalDoor from './entities/arena/verticalDoor';
+import HorizontalDoor from './entities/arena/horizontalDoor';
 import * as Const from "./constants";
 import _ from "lodash";
 import Player from "./entities/player";
@@ -95,8 +96,14 @@ export default class LevelManager {
       wall.setup(this.scene, this._blockGroup);
       this._blockGroup.add(wall);
     }
-    const door = new Door(this.scene, 0, 0);
-    door.setup(this.scene);
+    const left_door = new VerticalDoor(this.scene, 32 - wallunit * 2 + thick, 100 - wallunit * 2 + WallThickness, 'left');
+    left_door.setup(this.scene);
+    const right_door= new VerticalDoor(this.scene, 32 + wallunit * 2 - thick, 100 - wallunit * 2 + WallThickness, 'right');
+    right_door.setup(this.scene);
+    const top_door = new HorizontalDoor(this.scene, 32, 100 - wallunit * 4 + thick * 4, 'top');
+    top_door.setup(this.scene);
+    const bottom_door= new HorizontalDoor(this.scene, 32, 100, 'bottom');
+    bottom_door.setup(this.scene);
     this.scene.physics.add.collider(this.localPlayer, this._blockGroup);
     this.scene.physics.add.collider(this._spearGroup, this._blockGroup, (spear, block) => {
       const s = spear as Spear;
