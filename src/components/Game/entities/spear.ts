@@ -1,4 +1,5 @@
 import Phaser from "phaser";
+import Monster from "./monster";
 
 const MIN_SPEED = 200;
 const DRAG = 1000;
@@ -12,6 +13,7 @@ class Spear extends Phaser.Physics.Arcade.Sprite {
   _maxSpeed: number;
   _wallHit: boolean;
   _monstersHit: Phaser.GameObjects.Group
+
   constructor(scene : Phaser.Scene, x, y, id, angle = 0) {
     console.log("SPEAR:", x, y, angle);
     super(scene, x, y, "spear", 0);
@@ -41,6 +43,20 @@ class Spear extends Phaser.Physics.Arcade.Sprite {
       body.setMaxSpeed(this._maxSpeed);
       // body.drag.set(1, 0);
     }
+  }
+
+  onWallHit() {
+    if (this._wallHit)
+      return;
+    this._wallHit = true;
+    this.scene.cameras.main.shake(25, 0.01, true);
+  }
+
+  onHitMonster(m: Monster) {
+    if (this._monstersHit.contains(m))
+      return;
+    this._monstersHit.add(m);
+    this.scene.cameras.main.shake(20, 0.02, false);
   }
 
   update() {

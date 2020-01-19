@@ -156,14 +156,14 @@ export default class LevelManager {
     });
     this.scene.physics.add.collider(this._spearGroup, this.arena._blockGroup, (spear, area) => {
       const s = spear as Spear;
-      s._wallHit = true;
+      s.onWallHit();
     });
     this.scene.physics.add.overlap(this._spearGroup, this._monsterGroup, (spear, monster) => {
       const s = spear as Spear;
       const m = monster as Monster;
       m.isHit = true;
       m.body.mass = 0;
-      s._monstersHit.add(m);
+      s.onHitMonster(m);
       this.scene.time.delayedCall(2000, f => {
         if (this.leader) {
           _.forEach(this._monsterGroup.getChildren(), monster => {
