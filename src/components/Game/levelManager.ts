@@ -1,13 +1,14 @@
 import PeerNetwork from "./network/peer_network";
 import { TextLabel } from "./gui/textLabel";
-import Wall, { WallThickness } from './entities/arena/wall';
-import VerticalDoor from './entities/arena/verticalDoor';
-import HorizontalDoor from './entities/arena/horizontalDoor';
+import Wall, { WallThickness } from "./entities/arena/wall";
+import VerticalDoor from "./entities/arena/verticalDoor";
+import HorizontalDoor from "./entities/arena/horizontalDoor";
 import * as Const from "./constants";
 import _ from "lodash";
 import Player from "./entities/player";
 import Spear from "./entities/spear";
-const uuidv4 = require('uuid/v4');
+import Monster from "./entities/monster";
+const uuidv4 = require("uuid/v4");
 
 export default class LevelManager {
   network: PeerNetwork;
@@ -15,6 +16,7 @@ export default class LevelManager {
   _connectionStatusText: any;
   _entitiesGroup: Phaser.GameObjects.Group;
   _spearGroup: Phaser.GameObjects.Group;
+  _monsterGroup: Phaser.GameObjects.Group;
   _blockGroup: Phaser.Physics.Arcade.StaticGroup;
   _physics: any;
   staticObjects: Phaser.Physics.Arcade.Group;
@@ -43,6 +45,7 @@ export default class LevelManager {
     // Init groups
     this._entitiesGroup = this.scene.add.group();
     this._spearGroup = this.scene.add.group();
+    this._monsterGroup = this.scene.add.group();
     this._blockGroup = this.scene.physics.add.staticGroup();
     this._createWorld();
   }
@@ -96,13 +99,23 @@ export default class LevelManager {
       wall.setup(this.scene, this._blockGroup);
       this._blockGroup.add(wall);
     }
-    const left_door = new VerticalDoor(this.scene, 32 - wallunit * 2 + thick, 100 - wallunit * 2 + WallThickness, 'left');
+    const left_door = new VerticalDoor(
+      this.scene,
+      32 - wallunit * 2 + thick,
+      100 - wallunit * 2 + WallThickness,
+      "left"
+    );
     left_door.setup(this.scene);
-    const right_door= new VerticalDoor(this.scene, 32 + wallunit * 2 - thick, 100 - wallunit * 2 + WallThickness, 'right');
+    const right_door = new VerticalDoor(
+      this.scene,
+      32 + wallunit * 2 - thick,
+      100 - wallunit * 2 + WallThickness,
+      "right"
+    );
     right_door.setup(this.scene);
-    const top_door = new HorizontalDoor(this.scene, 32, 100 - wallunit * 4 + thick * 4, 'top');
+    const top_door = new HorizontalDoor(this.scene, 32, 100 - wallunit * 4 + thick * 4, "top");
     top_door.setup(this.scene);
-    const bottom_door= new HorizontalDoor(this.scene, 32, 100, 'bottom');
+    const bottom_door = new HorizontalDoor(this.scene, 32, 100, "bottom");
     bottom_door.setup(this.scene);
     this.scene.physics.add.collider(this.localPlayer, this._blockGroup);
     this.scene.physics.add.collider(this._spearGroup, this._blockGroup, (spear, block) => {
@@ -110,10 +123,10 @@ export default class LevelManager {
       s._wallHit = true;
     });
     this.scene.physics.add.collider(this._spearGroup, this.localPlayer, (spear, player) => {
-      const s = spear as Spear
-      const p = player as Player
-      if(p.hasSpear){
-        return
+      const s = spear as Spear;
+      const p = player as Player;
+      if (p.hasSpear) {
+        return;
       }
       _.forEach(this._spearGroup.getChildren(), spear => {
         if (spear && spear.id === s.id) {
@@ -125,18 +138,6 @@ export default class LevelManager {
       });
       this.localPlayer.hasSpear = true;
     });
-
-    // this._createMap();
-    // this._createMapObjects();
-
-    // testing broadcasting the player state at a slower interval
-    // this.broadcastTimer = this.scene.time.addEvent({
-    //   delay: 20, // ms
-    //   callback: this._broadcastPlayerUpdate,
-    //   //args: [],
-    //   callbackScope: this,
-    //   loop: true
-    // });
   }
   _createMap() {
     throw new Error("Method not implemented.");
@@ -162,24 +163,51 @@ export default class LevelManager {
     for (const s of this._spearGroup.getChildren()) {
       s.update();
     }
+    for (const m of this._monsterGroup.getChildren()) {
+      m.update();
+    }
     this._broadcastPlayerUpdate();
+    if (this.leader) {
+      this._broadcastMonstersUpdate();
+    }
   }
 
   update() {
     // this._updateCollision();
     this._updateEntities();
+    if (this.leader) {
+      // SPAWN MONSTERS HERE
+      if (this._monsterGroup.getChildren().length === 0) {
+        const m = new Monster(this.scene, -60, -100, uuidv4());
+        m.setup(this.scene);
+        this._monsterGroup.add(m);
+      }
+    }
   }
   _broadcastPlayerUpdate() {
     var body = this.localPlayer.body;
-    // console.log("Broadcasting...")
     this.network.broadcastToPeers(Const.PeerJsMsgType.PLAYER_UPDATE, {
       rotation: this.localPlayer.rotation,
       state: this.localPlayer.currentState,
       x: Math.round(this.localPlayer.x),
       y: Math.round(this.localPlayer.y),
-      v: body.velocity.y.toFixed(2),
+      vx: body.velocity.x.toFixed(2),
+      vy: body.velocity.y.toFixed(2),
       hasSpear: this.localPlayer.hasSpear
-      // a: body.acceleration.x.toFixed(2)
+    });
+  }
+
+  _broadcastMonstersUpdate() {
+    const monsters = this._monsterGroup.getChildren() as Monster[];
+    this.network.broadcastToPeers(Const.PeerJsMsgType.MONSTERS_UPDATE, {
+      monsters: monsters.map(m => ({
+        id: m.id,
+        rotation: m.rotation,
+        x: Math.round(m.x),
+        y: Math.round(m.y),
+        vx: m.body.velocity.x.toFixed(2),
+        vy: m.body.velocity.y.toFixed(2)
+      }))
     });
   }
 
@@ -223,6 +251,9 @@ export default class LevelManager {
         break;
       case Const.PeerJsMsgType.SPEAR_PICKED_UP:
         this._handleSpearPickedUp(data);
+        break;
+      case Const.PeerJsMsgType.MONSTERS_UPDATE:
+        this._handleMonstersUpdate(data);
         break;
     }
   }
@@ -301,8 +332,8 @@ export default class LevelManager {
     remotePlayer.x = data.x;
     remotePlayer.y = data.y;
     remotePlayer.hasSpear = data.hasSpear;
-    body.velocity.y = data.v;
-    body.acceleration.x = data.a;
+    body.velocity.x = data.vx;
+    body.velocity.y = data.vy;
   }
 
   _handleBlockBump(data) {
@@ -328,5 +359,26 @@ export default class LevelManager {
         spear.destroy();
       }
     });
+  }
+  _handleMonstersUpdate(data) {
+    const { monsters } = data;
+    const myMonsters = this._monsterGroup.getChildren() as Monster[];
+    for (const monster of monsters) {
+      const potentialMonster: Monster | undefined = myMonsters.find(m => m.id === monster.id);
+      if (potentialMonster) {
+        potentialMonster.rotation = monster.rotation;
+        potentialMonster.x = monster.x;
+        potentialMonster.y = monster.y;
+        potentialMonster.body.velocity.x = monster.vx;
+        potentialMonster.body.velocity.y = monster.vy;
+      } else {
+        const m = new Monster(this.scene, monster.x, monster.y, uuidv4());
+        m.setup(this.scene);
+        m.rotation = monster.rotation;
+        m.body.velocity.x = monster.vx;
+        m.body.velocity.y = monster.vy;
+        this._monsterGroup.add(m);
+      }
+    }
   }
 }
