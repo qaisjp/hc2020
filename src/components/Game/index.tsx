@@ -36,11 +36,9 @@ class MyScene extends Phaser.Scene {
 const Game = () => {
   useEffect(() => {
     let game;
-
-    window.addEventListener("resize", () => {
+    window.addEventListener('resize', () => {
       game.scale.resize(window.innerWidth, window.innerHeight);
-    });
-
+    })
     const config = {
       type: Phaser.AUTO,
       parent: "phaser-example",
@@ -48,7 +46,7 @@ const Game = () => {
       height: 1080,
       scene: MyScene,
       scale: {
-        mode: Phaser.Scale.NONE
+        mode: Phaser.Scale.NONE,
       },
       physics: {
         default: "arcade",
