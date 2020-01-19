@@ -33,6 +33,7 @@ class MyScene extends Phaser.Scene {
     //   yoyo: true,
     //   loop: -1
     // });
+    this.cameras.main.setBackgroundColor(0x23282e)
     this.manager = new LevelManager(this.game, this);
   }
 }

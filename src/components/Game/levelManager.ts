@@ -14,6 +14,8 @@ export default class LevelManager {
   network: PeerNetwork;
   remotePlayers: any;
   _connectionStatusText: any;
+  _introText: any;
+  _instructionText: any;
   _entitiesGroup: Phaser.GameObjects.Group;
   _spearGroup: Phaser.GameObjects.Group;
   _laserGroup: Phaser.GameObjects.Group;
@@ -60,8 +62,12 @@ export default class LevelManager {
   }
 
   _createWorld() {
-    this._connectionStatusText = new TextLabel(this.scene, 16, 16, "connecting...", null, true, false, 0);
+    this._connectionStatusText = new TextLabel(this.scene, 0, -50, "connecting...", null, true, false, 0);
+    this._introText = new TextLabel(this.scene, -300, -200, "You've gone offline!", null, true, false, 0, 32)
+    this._instructionText = new TextLabel(this.scene, -280, 350, "WASD to move. Mouse to aim. Click to shoot.", null, true, false, 0, 14)
     this.scene.add.existing(this._connectionStatusText);
+    this.scene.add.existing(this._introText);
+    this.scene.add.existing(this._instructionText);
     this.remotePlayers = this.scene.add.group();
 
     this.network.addListener(Const.PeerJsEvents.OPEN, this._onOpen, this);
