@@ -29,8 +29,9 @@ class Player extends Entity {
   createSpear: Function | undefined;
   isPlayer: boolean;
   hasSpear: boolean;
+  currentAnimation: string;
   constructor(scene, x, y, id = "local", isPlayer = false, createSpear: Function | undefined = undefined) {
-    super(scene, x, y, "player", 0);
+    super(scene, x, y, "idle_spear", 0);
     this.scene.anims.create({
       key: "idle_spear",
       frames: [
@@ -40,6 +41,38 @@ class Player extends Entity {
       frameRate: 2,
       repeat: -1
     });
+    this.scene.anims.create({
+      key: "walk_spear",
+      frames: [
+        { key: "player", frame: "pixil-frame-2.png" },
+        { key: "player", frame: "pixil-frame-3.png" },
+        { key: "player", frame: "pixil-frame-4.png" },
+        { key: "player", frame: "pixil-frame-5.png" }
+      ],
+      frameRate: 2,
+      repeat: -1
+    });
+    this.scene.anims.create({
+      key: "idle_nospear",
+      frames: [
+        { key: "player", frame: "pixil-frame-6.png" },
+        { key: "player", frame: "pixil-frame-7.png" },
+      ],
+      frameRate: 2,
+      repeat: -1
+    });
+    this.scene.anims.create({
+      key: "walk_nospear",
+      frames: [
+        { key: "player", frame: "pixil-frame-8.png" },
+        { key: "player", frame: "pixil-frame-9.png" },
+        { key: "player", frame: "pixil-frame-10.png" },
+        { key: "player", frame: "pixil-frame-11.png" },
+      ],
+      frameRate: 2,
+      repeat: -1
+    });
+    
     this.id = id;
     this.isPlayer = isPlayer;
     // this.maxSpeed = Const.PLAYER_MAX_SPEED;
@@ -55,6 +88,7 @@ class Player extends Entity {
     this.hasSpear = true;
     this.isNew = true;
     this.currentScale = 2.8;
+    this.currentAnimation = "idle_spear"
     // this._addAnimations([{ name: "walk", frames: [1, 2, 3] }], 8, true);
   }
 
@@ -91,6 +125,8 @@ class Player extends Entity {
       }
       return;
     }
+    let moving = false
+
     if (this.cursors && this.body && this.isPlayer) {
       const body = this.body as Phaser.Physics.Arcade.Body;
       const pointer = this.scene.input.activePointer;
@@ -125,16 +161,20 @@ class Player extends Entity {
       let localXAcceleration = 0;
       let localYAcceleration = 0;
       if (this.cursors.left && this.cursors.left.isDown) {
+        moving = true
         localXAcceleration = -6000;
       } else if (this.cursors.right && this.cursors.right.isDown) {
+        moving = true
         localXAcceleration = 6000;
       } else {
         localXAcceleration = 0;
       }
 
       if (this.cursors.down && this.cursors.down.isDown) {
+        moving = true
         localYAcceleration = 6000;
       } else if (this.cursors.up && this.cursors.up.isDown) {
+        moving = true
         localYAcceleration = -6000;
       } else {
         localYAcceleration = 0;
@@ -143,6 +183,16 @@ class Player extends Entity {
       // const accelerationY = Math.cos(directionRad) * localXAcceleration + Math.sin(directionRad) * localYAcceleration;
       body.setAccelerationX(localXAcceleration);
       body.setAccelerationY(localYAcceleration);
+      // if(moving && this.currentAnimation.includes("idle")){
+      //   const anim = this.hasSpear ? "walk_spear" :  "walk_nospear"
+      //   this.anims.play(anim)
+      //   this.currentAnimation = anim
+      // }
+      // if(!moving && this.currentAnimation.includes("walk")){
+      //   const anim = this.hasSpear ? "idle_spear" :  "idle_nospear"
+      //   this.anims.play(anim)
+      //   this.currentAnimation = anim
+      // }
     }
     // this._updateAnimations();
     // this._grounded = this.body.onFloor() || this.body.touching.down;

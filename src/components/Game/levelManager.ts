@@ -88,7 +88,7 @@ export default class LevelManager {
       this.scene,
       -220,
       390,
-      "Fight the malware for your life",
+      "Fight the malwares for your life",
       null,
       true,
       false,
