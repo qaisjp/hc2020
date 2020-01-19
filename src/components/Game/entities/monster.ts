@@ -9,6 +9,7 @@ const FIRE_RATE = .5;
 class Monster extends Phaser.Physics.Arcade.Sprite {
   id: string;
   isHit: boolean;
+  createLaser: Function | undefined;
   _rand: Phaser.Math.RandomDataGenerator;
   _numUpdates: number;
   _numRand: number;
@@ -23,7 +24,8 @@ class Monster extends Phaser.Physics.Arcade.Sprite {
     this._numRand = 0;
   }
 
-  setup(scene) {
+  setup(scene, createLaser) {
+    this.createLaser = createLaser;
     scene.physics.world.enable(this);
     scene.add.existing(this);
     // this.setCollideWorldBounds(false);
@@ -56,9 +58,9 @@ class Monster extends Phaser.Physics.Arcade.Sprite {
           body.setVelocityY(JUMP_VEL)
         } else if (rand < (walk_rate)) {
           body.setVelocityY(-JUMP_VEL)
-        } //else {
-
-        //}
+        } else if (this.createLaser) {
+          this.createLaser(this);
+        }
       }
       this._numUpdates = this._numUpdates + 1;
     }
