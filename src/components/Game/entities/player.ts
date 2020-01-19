@@ -33,6 +33,7 @@ class Player extends Entity {
   _clickDown: boolean;
   createSpear: Function | undefined;
   isPlayer: boolean;
+  hasSpear: boolean
   constructor(scene, x, y, id = "local", isPlayer = false, createSpear : Function | undefined = undefined) {
     super(scene, x, y, "playersheet", 0, /** Const.PLAYER_ACCEL */ 1);
     this.id = id;
@@ -50,6 +51,7 @@ class Player extends Entity {
     this._moving = [];
     this._clickDown = false;
     this.createSpear = createSpear;
+    this.hasSpear = true;
     this._addAnimations([{ name: "walk", frames: [1, 2, 3] }], 8, true);
   }
 
@@ -80,8 +82,11 @@ class Player extends Entity {
       );
       if (pointer.isDown) {
         this._clickDown = true;
-      } else if (this._clickDown && this.createSpear) {
+      } else if (this._clickDown && this.createSpear && this.hasSpear) {
         this.createSpear()
+        this.hasSpear = false;
+        this._clickDown = false;
+      } else {
         this._clickDown = false;
       }
       // const directionRad = 0
