@@ -14,7 +14,7 @@ const WAVES = [1, 2, 3, 5, 10];
 
 export default class LevelManager {
   network: any;
-  remotePlayers: any;
+  remotePlayers: Phaser.GameObjects.Group | any;
   _connectionStatusText: any;
   _introText: any;
   _titleSprite: any;
@@ -162,7 +162,7 @@ export default class LevelManager {
         }
       });
 
-      if (this.remotePlayers.length > 0) {
+      if (this.remotePlayers.children.size > 0) {
         this.ghost = new Ghost(this.scene, p.body.x, p.body.y, "local");
         this.ghost.setup(this.scene);
         this.scene.cameras.main.startFollow(this.ghost);

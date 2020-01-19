@@ -95,6 +95,7 @@ class Player extends Entity {
   setup(scene) {
     super.setup(scene);
     this.anims.play("idle_spear");
+    this.setSize(200, 200);
     this.setScale(0.01);
     this.cursors = this.scene.input.keyboard.addKeys({
       up: Phaser.Input.Keyboard.KeyCodes.W,
