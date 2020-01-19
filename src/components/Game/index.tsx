@@ -30,6 +30,7 @@ class MyScene extends Phaser.Scene {
     this.load.audio('spear', 'res/spear.wav');
     this.load.audio('wall', 'res/wall.wav');
     this.load.audio('wave', 'res/wave.wav');
+    this.load.audio('join', 'res/join.wav');
   }
 
   update() {

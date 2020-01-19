@@ -49,6 +49,7 @@ export default class LevelManager {
   wallSfx: any;
   killSfx: any;
   waveSfx: any;
+  joinSfx: any;
   constructor(game: Phaser.Game, scene: Phaser.Scene) {
     this.game = game;
     this.scene = scene;
@@ -70,6 +71,7 @@ export default class LevelManager {
     this.wallSfx = this.scene.sound.add("wall");
     this.killSfx = this.scene.sound.add("kill");
     this.waveSfx = this.scene.sound.add("wave");
+    this.joinSfx = this.scene.sound.add("join");
     // Init groups
     this._entitiesGroup = this.scene.add.group();
     this._spearGroup = this.scene.add.group();
@@ -281,7 +283,7 @@ export default class LevelManager {
         this.localPlayer.body.y
       );
     }
-    if (this.remotePlayers) {
+    if (this.remotePlayers.children) {
       for (const p of this.remotePlayers.getChildren()) {
         const d = Phaser.Math.Distance.Between(monster.body.x, monster.body.y, p.body.x, p.body.y);
         if (d < closestDistance) {
@@ -510,10 +512,12 @@ export default class LevelManager {
 
     this.scene.time.delayedCall(Const.NETWORK_STATUS_CLEAR_TIME, f => (this._connectionStatusText.visible = false));
     // Setup the player
+    this._laserGroup.getChildren().forEach(c => c.destroy())
     var newPlayer = new Player(this.scene, data.x, data.y, data.from);
     newPlayer.setup(this.scene);
     this.remotePlayers.add(newPlayer);
     this._entitiesGroup.add(newPlayer);
+    this.joinSfx.play();
     if (this.leader) {
       this.network.peerMessageQueue[data.from] = [];
       // Send the spears to the new player
