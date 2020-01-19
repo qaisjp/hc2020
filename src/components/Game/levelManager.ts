@@ -153,6 +153,7 @@ export default class LevelManager {
       p.destroy();
       this.network.broadcastToPeers(Const.PeerJsMsgType.PLAYER_DEAD, {});
       this.dead = true;
+      console.log("dead called")
     });
     this.scene.physics.add.collider(this._spearGroup, this.arena._blockGroup, (spear, area) => {
       const s = spear as Spear;
