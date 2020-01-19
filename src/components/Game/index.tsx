@@ -74,7 +74,9 @@ const Game = () => {
     };
 
     game = new Phaser.Game(config);
-    game.scale.resize(window.innerWidth, window.innerHeight);
+    setTimeout(() => {
+      game.scale.resize(window.innerWidth, window.innerHeight);
+    }, 100)
     return () => {};
   }, []);
 
