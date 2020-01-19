@@ -76,7 +76,7 @@ export default class LevelManager {
     const arena = new Arena(this.scene, 0, 300);
     arena.setup(this.scene);
     this.scene.physics.add.collider(this.localPlayer, arena._blockGroup);
-    this.scene.physics.add.collider(this._spearGroup, this._blockGroup, (spear, are) => {
+    this.scene.physics.add.collider(this._spearGroup, arena._blockGroup, (spear, are) => {
       const s = spear as Spear;
       s._wallHit = true;
     });
