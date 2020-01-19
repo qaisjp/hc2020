@@ -35,6 +35,8 @@ export default class LevelManager {
   broadcastTimer: Phaser.Time.TimerEvent | undefined;
   ghost: any;
   gameStarted: boolean;
+  spawning: boolean;
+  arena: Arena | undefined;
   constructor(game: Phaser.Game, scene: Phaser.Scene) {
     this.game = game;
     this.scene = scene;
@@ -50,6 +52,7 @@ export default class LevelManager {
       return;
     };
     this.gameStarted = false;
+    this.spawning = false;
     // Init groups
     this._entitiesGroup = this.scene.add.group();
     this._spearGroup = this.scene.add.group();
@@ -116,11 +119,11 @@ export default class LevelManager {
     this.localPlayer.setup(this.scene);
     this.scene.cameras.main.startFollow(this.localPlayer);
     this._entitiesGroup.add(this.localPlayer);
-    const arena = new Arena(this.scene, 0, 300);
-    arena.setup(this.scene);
-    this.scene.physics.add.collider(this.localPlayer, arena._blockGroup);
-    this.scene.physics.add.collider(this._monsterGroup, arena._blockGroup);
-    this.scene.physics.add.collider(this._laserGroup, arena._blockGroup, (laser, area) => {
+    this.arena = new Arena(this.scene, 0, 300);
+    this.arena.setup(this.scene);
+    this.scene.physics.add.collider(this.localPlayer, this.arena._blockGroup);
+    this.scene.physics.add.collider(this._monsterGroup, this.arena._blockGroup);
+    this.scene.physics.add.collider(this._laserGroup, this.arena._blockGroup, (laser, area) => {
       const l = laser as Laser;
       _.forEach(this._laserGroup.getChildren(), laser => {
         if (laser && laser.id === l.id) {
@@ -147,7 +150,7 @@ export default class LevelManager {
       this.network.broadcastToPeers(Const.PeerJsMsgType.PLAYER_DEAD, {});
       this.dead = true;
     });
-    this.scene.physics.add.collider(this._spearGroup, arena._blockGroup, (spear, area) => {
+    this.scene.physics.add.collider(this._spearGroup, this.arena._blockGroup, (spear, area) => {
       const s = spear as Spear;
       s._wallHit = true;
     });
@@ -253,7 +256,7 @@ export default class LevelManager {
     if (this.gameStarted) {
       // this._updateCollision();
       this._updateEntities();
-      if (this.leader) {
+      if (this.leader && this.spawning) {
         // SPAWN MONSTERS HERE
         if (this._monsterGroup.getChildren().length === 0) {
           const m = new Monster(this.scene, -40, -80, uuidv4());
@@ -269,8 +272,8 @@ export default class LevelManager {
       this.scene.input.keyboard.on("keydown", event => {
         switch (event.key) {
           case " ":
-            if(!this.gameStarted){
-              this.gameStarted = true
+            if (!this.gameStarted) {
+              this.gameStarted = true;
               this._startText.destroy();
               this._introText.destroy();
               this._createWorld();
@@ -321,6 +324,20 @@ export default class LevelManager {
       this.leader = true;
     }
     this._connectionStatusText.setText(`connected, id: ${id}, leader: ${this.leader}`);
+    if (this.arena) {
+      if (this.leader) {
+        for (const d of this.arena.doors) {
+          d.open();
+        }
+      } else {
+        for (const d of this.arena.doors) {
+          d.openImmediate();
+        }
+      }
+      this.scene.time.delayedCall(2000, f => {
+        this.spawning = true
+      });
+    }
     // this.scene.time.delayedCall(Const.NETWORK_STATUS_CLEAR_TIME, f => (this._connectionStatusText.visible = false));
   }
 
