@@ -3,6 +3,8 @@ import * as Const from "../constants";
 
 const DRAG = 1200;
 const JUMP_VEL = 300;
+const UPDATE_RATE = 30;
+const FIRE_RATE = .5;
 
 class Monster extends Phaser.Physics.Arcade.Sprite {
   id: string;
@@ -36,21 +38,23 @@ class Monster extends Phaser.Physics.Arcade.Sprite {
 
   update() {
     if (this.body) {
-      if(this.isHit){
+      if (this.isHit) {
         return
       }
       const body = this.body as Phaser.Physics.Arcade.Body;
-      if (this._numUpdates % 60 === 0) {
+      if (this._numUpdates % UPDATE_RATE === 0) {
         this._numUpdates = 0;
         var rand = this._rand.frac();
         this._numRand = this._numRand + 1;
-        if (rand < (1.0 / 5.0)) {
+
+        var walk_rate = 1.0 - FIRE_RATE;
+        if (rand < (walk_rate / 4.0)) {
           body.setVelocityX(-JUMP_VEL)
-        } else if (rand < (2.0 / 5.0)) {
+        } else if (rand < (2 * walk_rate / 4.0)) {
           body.setVelocityX(JUMP_VEL)
-        } else if (rand < (3.0 / 5.0)) {
+        } else if (rand < (3 * walk_rate / 4.0)) {
           body.setVelocityY(JUMP_VEL)
-        } else if (rand < (4.0 / 5.0)) {
+        } else if (rand < (walk_rate)) {
           body.setVelocityY(-JUMP_VEL)
         } //else {
 
