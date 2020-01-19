@@ -86,7 +86,7 @@ export default class LevelManager {
     this.scene.physics.add.collider(this._spearGroup, this.localPlayer, (spear, player) => {
       const s = spear as Spear;
       const p = player as Player;
-      if (p.hasSpear) {
+      if (p.hasSpear || p.id !== "local") {
         return;
       }
       _.forEach(this._spearGroup.getChildren(), spear => {
