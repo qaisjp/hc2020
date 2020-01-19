@@ -1,6 +1,6 @@
 import PeerNetwork from "./network/peer_network";
 import { TextLabel } from "./gui/textLabel";
-import Arena from './entities/arena';
+import Arena from "./entities/arena";
 import * as Const from "./constants";
 import _ from "lodash";
 import Player from "./entities/player";
@@ -79,6 +79,7 @@ export default class LevelManager {
     const arena = new Arena(this.scene, 0, 300);
     arena.setup(this.scene);
     this.scene.physics.add.collider(this.localPlayer, arena._blockGroup);
+    this.scene.physics.add.collider(this._monsterGroup, arena._blockGroup);
     this.scene.physics.add.collider(this._spearGroup, arena._blockGroup, (spear, area) => {
       const s = spear as Spear;
       s._wallHit = true;
@@ -88,7 +89,7 @@ export default class LevelManager {
       const m = monster as Monster;
       m.isHit = true;
       m.body.mass = 0;
-      s._monstersHit.add(m)
+      s._monstersHit.add(m);
     });
     this.scene.physics.add.collider(this._spearGroup, this.localPlayer, (spear, player) => {
       const s = spear as Spear;
@@ -146,14 +147,13 @@ export default class LevelManager {
     if (this.leader) {
       // SPAWN MONSTERS HERE
       if (this._monsterGroup.getChildren().length === 0) {
-        const m = new Monster(this.scene, -60, -100, uuidv4());
+        const m = new Monster(this.scene, -40, -80, uuidv4());
         m.setup(this.scene);
         this._monsterGroup.add(m);
 
         const m2 = new Monster(this.scene, -80, -120, uuidv4());
         m2.setup(this.scene);
         this._monsterGroup.add(m2);
-
       }
     }
   }

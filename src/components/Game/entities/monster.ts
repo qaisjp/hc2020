@@ -7,15 +7,16 @@ const JUMP_VEL = 300;
 class Monster extends Phaser.Physics.Arcade.Sprite {
   id: string;
   isHit: boolean;
-  _rand: any;
+  _rand: Phaser.Math.RandomDataGenerator;
   _numUpdates: number;
   _numRand: number;
 
-  constructor(scene, x, y, id = "local") {
+  constructor(scene, x, y, id) {
     super(scene, x, y, "playersheet", 0);
     this.id = id;
     this.isHit = false;
-    this._rand = new Phaser.Math.RandomDataGenerator(this.id);
+    this._rand = new Phaser.Math.RandomDataGenerator([id]);
+    console.log(this._rand)
     this._numUpdates = 0;
     this._numRand = 0;
   }
@@ -35,19 +36,21 @@ class Monster extends Phaser.Physics.Arcade.Sprite {
 
   update() {
     if (this.body) {
+      if(this.isHit){
+        return
+      }
       const body = this.body as Phaser.Physics.Arcade.Body;
-      if (this._numUpdates % 60 == 0) {
+      if (this._numUpdates % 60 === 0) {
         this._numUpdates = 0;
-        var rand = this._rand();
+        var rand = this._rand.frac();
         this._numRand = this._numRand + 1;
-
-        if (rand < 1 / 5) {
+        if (rand < (1.0 / 5.0)) {
           body.setVelocityX(-JUMP_VEL)
-        } else if (rand < 2 / 5) {
-          body.setVelocityX(-JUMP_VEL)
-        } else if (rand < 3 / 5) {
+        } else if (rand < (2.0 / 5.0)) {
+          body.setVelocityX(JUMP_VEL)
+        } else if (rand < (3.0 / 5.0)) {
           body.setVelocityY(JUMP_VEL)
-        } else if (rand < 4 / 5) {
+        } else if (rand < (4.0 / 5.0)) {
           body.setVelocityY(-JUMP_VEL)
         } //else {
 
