@@ -25,6 +25,11 @@ class MyScene extends Phaser.Scene {
     this.load.bitmapFont("plumber_bros", "res/fonts/plumber_bros_gray.png", "res/fonts/plumber_bros.xml");
     this.load.multiatlas('monster', 'res/monster.json', 'res');
     this.load.multiatlas('player', 'res/player.json', 'res');
+    this.load.audio('kill', 'res/kill.wav');
+    this.load.audio('laser', 'res/laser.wav');
+    this.load.audio('spear', 'res/spear.wav');
+    this.load.audio('wall', 'res/wall.wav');
+    this.load.audio('wave', 'res/wave.wav');
   }
 
   update() {

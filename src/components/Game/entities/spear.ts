@@ -13,7 +13,7 @@ class Spear extends Phaser.Physics.Arcade.Sprite {
   _maxSpeed: number;
   _wallHit: boolean;
   _monstersHit: Phaser.GameObjects.Group
-
+  sfx: any;
   constructor(scene : Phaser.Scene, x, y, id, angle = 0) {
     console.log("SPEAR:", x, y, angle);
     super(scene, x, y, "spear", 0);
@@ -23,6 +23,7 @@ class Spear extends Phaser.Physics.Arcade.Sprite {
     this._maxSpeed = 6000;
     this._wallHit = false;
     this._monstersHit = scene.add.group()
+    this.sfx = this.scene.sound.add('spear');
   }
 
   setup(scene: Phaser.Scene, group: Phaser.GameObjects.Group) {
@@ -31,6 +32,7 @@ class Spear extends Phaser.Physics.Arcade.Sprite {
     group.add(this);
     this.setSize(50, 50);
     this.setDisplaySize(40, 40);
+    this.sfx.play()
     if (this.body) {
       const body = this.body as Phaser.Physics.Arcade.Body;
       // this.body.setSize(this.), 40);

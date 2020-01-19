@@ -46,6 +46,9 @@ export default class LevelManager {
   laCollider: Phaser.Physics.Arcade.Collider | undefined;
   llCollider: Phaser.Physics.Arcade.Collider | undefined;
   slCollider: Phaser.Physics.Arcade.Collider | undefined;
+  wallSfx: any;
+  killSfx: any;
+  waveSfx: any;
   constructor(game: Phaser.Game, scene: Phaser.Scene) {
     this.game = game;
     this.scene = scene;
@@ -64,6 +67,9 @@ export default class LevelManager {
     this.gameStarted = false;
     this.spawning = false;
     this.canSpawn = false;
+    this.wallSfx = this.scene.sound.add("wall");
+    this.killSfx = this.scene.sound.add("kill");
+    this.waveSfx = this.scene.sound.add("wave");
     // Init groups
     this._entitiesGroup = this.scene.add.group();
     this._spearGroup = this.scene.add.group();
@@ -174,10 +180,12 @@ export default class LevelManager {
     });
     this.scene.physics.add.collider(this._spearGroup, this.arena._blockGroup, (spear, area) => {
       const s = spear as Spear;
+      this.wallSfx.play();
       s.onWallHit();
     });
     this.scene.physics.add.overlap(this._spearGroup, this._monsterGroup, (spear, monster) => {
       const s = spear as Spear;
+      this.killSfx.play();
       const m = monster as Monster;
       m.isHit = true;
       m.body.mass = 0;
@@ -273,11 +281,13 @@ export default class LevelManager {
         this.localPlayer.body.y
       );
     }
-    for (const p of this.remotePlayers.getChildren()) {
-      const d = Phaser.Math.Distance.Between(monster.body.x, monster.body.y, p.body.x, p.body.y);
-      if (d < closestDistance) {
-        closestDistance = d;
-        closest = p;
+    if (this.remotePlayers) {
+      for (const p of this.remotePlayers.getChildren()) {
+        const d = Phaser.Math.Distance.Between(monster.body.x, monster.body.y, p.body.x, p.body.y);
+        if (d < closestDistance) {
+          closestDistance = d;
+          closest = p;
+        }
       }
     }
     if (closest) {
@@ -310,6 +320,7 @@ export default class LevelManager {
         this.arena
       ) {
         this.spawning = true;
+        this.waveSfx.play();
         for (const d of this.arena.doors) {
           d.open();
         }
@@ -599,6 +610,7 @@ export default class LevelManager {
   _handleDoor(open) {
     if (this.arena) {
       if (open) {
+        this.waveSfx.play();
         for (const d of this.arena.doors) {
           d.open();
         }

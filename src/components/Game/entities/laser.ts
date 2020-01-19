@@ -9,17 +9,20 @@ class Laser extends Phaser.Physics.Arcade.Sprite {
   _angle: number;
   _velocity: any;
   _initSpeed: number;
+  sfx: any;
   constructor(scene: Phaser.Scene, x, y, id, angle = 0) {
     super(scene, x, y, "laser", 0);
     this.id = id;
     this._angle = angle;
     this._initSpeed = INIT_SPEED;
+    this.sfx = this.scene.sound.add('laser');
   }
 
   setup(scene: Phaser.Scene, group: Phaser.GameObjects.Group) {
     scene.physics.world.enable(this);
     scene.add.existing(this);
     group.add(this);
+    this.sfx.play()
     this.setSize(20, 20);
     this.setDisplaySize(20, 20);
     if (this.body) {
