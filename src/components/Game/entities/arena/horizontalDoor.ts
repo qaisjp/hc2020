@@ -6,6 +6,7 @@ export default class Door extends Phaser.GameObjects.Group {
   opened: boolean;
   left: Phaser.GameObjects.Rectangle;
   right: Phaser.GameObjects.Rectangle;
+  cover: Phaser.GameObjects.Rectangle;
   type: string;
   constructor(scene, x, y, type = "bottom") {
     super(scene);
@@ -13,14 +14,22 @@ export default class Door extends Phaser.GameObjects.Group {
     this.y = y;
     this.scene = scene;
     this.opened = false;
-    this.left = new Phaser.GameObjects.Rectangle(scene, this.x - 60, this.y, 60, 10, 0x535353);
+
+    let off = -5
+    if (type === "top")
+      off = 5
+
+    this.left = new Phaser.GameObjects.Rectangle(scene, this.x - 60, this.y+off, 60, 10, 0x535353);
     this.left.setOrigin(0, 0.5);
-    this.right = new Phaser.GameObjects.Rectangle(scene, this.x + 60, this.y, 60, 10, 0x535353);
+    this.right = new Phaser.GameObjects.Rectangle(scene, this.x + 60, this.y+off, 60, 10, 0x535353);
     this.right.setOrigin(1.0, 0.5);
+    this.cover = new Phaser.GameObjects.Rectangle(scene, this.x, this.y, 110, 10, 0xffffff)
     this.type = type;
   }
 
   setup(scene: Phaser.Scene) {
+    this.add(this.cover);
+    scene.add.existing(this.cover);
     this.add(this.left);
     scene.add.existing(this.left);
     this.add(this.right);
@@ -38,16 +47,7 @@ export default class Door extends Phaser.GameObjects.Group {
   }
   open() {
     this.opened = true;
-    if (this.type === "bottom") {
-      this.scene.tweens.add({
-        targets: this.right,
-        rotation: Math.PI / 2
-      });
-      this.scene.tweens.add({
-        targets: this.left,
-        rotation: -Math.PI / 2
-      });
-    } else if (this.type === "top") {
+    if (this.type === "top") {
       this.scene.tweens.add({
         targets: this.right,
         rotation: -Math.PI / 2
@@ -55,6 +55,15 @@ export default class Door extends Phaser.GameObjects.Group {
       this.scene.tweens.add({
         targets: this.left,
         rotation: Math.PI / 2
+      });
+    } else if (this.type === "bottom") {
+      this.scene.tweens.add({
+        targets: this.right,
+        rotation: Math.PI / 2
+      });
+      this.scene.tweens.add({
+        targets: this.left,
+        rotation: -Math.PI / 2
       });
     }
   }

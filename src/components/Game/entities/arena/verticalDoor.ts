@@ -6,6 +6,7 @@ export default class Door extends Phaser.GameObjects.Group {
   opened: boolean;
   top: Phaser.GameObjects.Rectangle;
   bottom: Phaser.GameObjects.Rectangle;
+  cover: Phaser.GameObjects.Rectangle;
   type: string;
   constructor(scene, x, y, type = "left") {
     super(scene);
@@ -13,14 +14,21 @@ export default class Door extends Phaser.GameObjects.Group {
     this.y = y;
     this.scene = scene;
     this.opened = false;
+    let off = -5
+    if (type === "left")
+      off = 5
+
     this.top = new Phaser.GameObjects.Rectangle(scene, this.x, this.y - 60, 10, 60, 0x535353);
     this.top.setOrigin(0.5, 0.0);
     this.bottom = new Phaser.GameObjects.Rectangle(scene, this.x, this.y + 60, 10, 60, 0x535353);
     this.bottom.setOrigin(0.5, 1.0);
+    this.cover = new Phaser.GameObjects.Rectangle(scene, this.x, this.y, 10, 110, 0xffffff)
     this.type = type;
   }
 
   setup(scene: Phaser.Scene) {
+    this.add(this.cover);
+    scene.add.existing(this.cover);
     this.add(this.top);
     scene.add.existing(this.top);
     this.add(this.bottom);
