@@ -8,10 +8,12 @@ export default class Arena {
     x: number;
     y: number;
     _blockGroup: Phaser.Physics.Arcade.StaticGroup;
+    doors: any[]
     constructor(scene : Phaser.Scene, x: number, y: number) {
         this.x = x;
         this.y = y;
         this._blockGroup = scene.physics.add.staticGroup();
+        this.doors = []
     }
 
     setup(scene : Phaser.Scene) {
@@ -45,5 +47,6 @@ export default class Arena {
         top_door.setup(scene);
         const bottom_door= new HorizontalDoor(scene, this.x, this.y, 'bottom');
         bottom_door.setup(scene);
+        this.doors.push(left_door, right_door, top_door, bottom_door)
     }
 }
