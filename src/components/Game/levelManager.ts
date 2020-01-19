@@ -10,6 +10,8 @@ import Laser from "./entities/laser";
 import Ghost from "./entities/ghost";
 const uuidv4 = require("uuid/v4");
 
+const WAVES = [1, 2, 3, 5, 10];
+
 export default class LevelManager {
   network: any;
   remotePlayers: any;
@@ -37,6 +39,7 @@ export default class LevelManager {
   gameStarted: boolean;
   spawning: boolean;
   arena: Arena | undefined;
+  waveNumber: number;
   constructor(game: Phaser.Game, scene: Phaser.Scene) {
     this.game = game;
     this.scene = scene;
@@ -45,6 +48,7 @@ export default class LevelManager {
     this.leader = false;
     this._connectionStatusText = null;
     this.dead = false;
+    this.waveNumber = 0;
 
     // make sure to cleanup peerjs when window is closed
     window.onunload = window.onbeforeunload = f => {
@@ -89,7 +93,6 @@ export default class LevelManager {
     this.scene.add.existing(this._instructionText);
     this.scene.add.existing(this._malwareText);
     this.scene.cameras.main.centerOn(0, 100);
-    // this._createWorld();
   }
 
   shutdown() {
@@ -253,20 +256,33 @@ export default class LevelManager {
     }
   };
 
+  createMonster(x, y, wait = true) {
+    const xOff = Math.ceil((Math.random() - 0.5) * 100);
+    const yOff = Math.ceil((Math.random() - 0.5) * 100);
+    this.scene.time.delayedCall(wait ? Math.random() * 4000 : 1, f => {
+      const m = new Monster(this.scene, x + xOff, y + yOff, uuidv4());
+      m.setup(this.scene, this.createLaser);
+      this._monsterGroup.add(m);
+    });
+  }
+
   update() {
     if (this.gameStarted) {
       // this._updateCollision();
       this._updateEntities();
       if (this.leader && this.spawning) {
         // SPAWN MONSTERS HERE
-        if (this._monsterGroup.getChildren().length === 0) {
-          const m = new Monster(this.scene, -40, -80, uuidv4());
-          m.setup(this.scene, this.createLaser);
-          this._monsterGroup.add(m);
-
-          const m2 = new Monster(this.scene, -80, -120, uuidv4());
-          m2.setup(this.scene, this.createLaser);
-          this._monsterGroup.add(m2);
+        if (this._monsterGroup.getChildren().length === 0 && this.arena) {
+          const nmbrMonsters = WAVES[this.waveNumber];
+          this.waveNumber++;
+          for (const step of [...Array(nmbrMonsters)].keys()) {
+            const ds = this.arena.doors;
+            const OFFSET = 120;
+            this.createMonster(ds[0].x + OFFSET, ds[0].y, step !== 0);
+            this.createMonster(ds[1].x - OFFSET, ds[1].y, step !== 0);
+            this.createMonster(ds[2].x, ds[2].y + OFFSET, step !== 0);
+            this.createMonster(ds[3].x, ds[3].y - OFFSET, step !== 0);
+          }
         }
       }
     } else {

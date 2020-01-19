@@ -1,8 +1,8 @@
 import React, { useRef, useEffect, useState } from "react";
 import Phaser from "phaser";
 import logoImg from "../../imgs/img.jpg";
-import spearImg from "../../imgs/spear.png";
-import avastImg from "../../imgs/avast_logo.png";
+import spearImg from "../../imgs/spear_gray.png";
+import avastImg from "../../imgs/avast_logo_light.png";
 import LevelManager from "./levelManager";
 
 import './Game.scss';
@@ -35,7 +35,7 @@ class MyScene extends Phaser.Scene {
     //   yoyo: true,
     //   loop: -1
     // });
-    this.cameras.main.setBackgroundColor(0xF7F7F7)
+    this.cameras.main.setBackgroundColor(0xFFFFFF)
     this.manager = new LevelManager(this.game, this);
   }
 }

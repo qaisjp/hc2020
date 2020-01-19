@@ -6,9 +6,9 @@ export default class Wall extends Phaser.GameObjects.Rectangle {
 
     constructor(scene, x, y, length, angle) {
         if (angle !== 0) {
-            super(scene, x, y, length, WallThickness, 0xffffff);
+            super(scene, x, y, length, WallThickness, 0x535353);
         } else {
-            super(scene, x, y, WallThickness, length, 0xffffff);
+            super(scene, x, y, WallThickness, length, 0x535353);
         }
     }
 

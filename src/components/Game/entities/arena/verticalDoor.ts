@@ -13,9 +13,9 @@ export default class Door extends Phaser.GameObjects.Group {
     this.y = y;
     this.scene = scene;
     this.opened = false;
-    this.top = new Phaser.GameObjects.Rectangle(scene, this.x, this.y - 60, 10, 60, 0xffffff);
+    this.top = new Phaser.GameObjects.Rectangle(scene, this.x, this.y - 60, 10, 60, 0x535353);
     this.top.setOrigin(0.5, 0.0);
-    this.bottom = new Phaser.GameObjects.Rectangle(scene, this.x, this.y + 60, 10, 60, 0xffffff);
+    this.bottom = new Phaser.GameObjects.Rectangle(scene, this.x, this.y + 60, 10, 60, 0x535353);
     this.bottom.setOrigin(0.5, 1.0);
     this.type = type;
   }
