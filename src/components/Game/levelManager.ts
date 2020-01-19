@@ -11,11 +11,13 @@ import Ghost from "./entities/ghost";
 const uuidv4 = require("uuid/v4");
 
 export default class LevelManager {
-  network: PeerNetwork;
+  network: any;
   remotePlayers: any;
   _connectionStatusText: any;
   _introText: any;
+  _startText: any;
   _instructionText: any;
+  _malwareText: any;
   _entitiesGroup: Phaser.GameObjects.Group;
   _spearGroup: Phaser.GameObjects.Group;
   _laserGroup: Phaser.GameObjects.Group;
@@ -32,10 +34,10 @@ export default class LevelManager {
   dead: boolean;
   broadcastTimer: Phaser.Time.TimerEvent | undefined;
   ghost: any;
+  gameStarted: boolean;
   constructor(game: Phaser.Game, scene: Phaser.Scene) {
     this.game = game;
     this.scene = scene;
-    this.network = new PeerNetwork(this);
     this.remotePlayers = null;
     this.staticObjects = new Phaser.Physics.Arcade.Group(this.scene.physics.world, scene);
     this.leader = false;
@@ -47,14 +49,44 @@ export default class LevelManager {
       this._disconnect();
       return;
     };
-    console.log(scene);
+    this.gameStarted = false;
     // Init groups
     this._entitiesGroup = this.scene.add.group();
     this._spearGroup = this.scene.add.group();
     this._laserGroup = this.scene.add.group();
     this._monsterGroup = this.scene.add.group();
     this._blockGroup = this.scene.physics.add.staticGroup();
-    this._createWorld();
+    this.remotePlayers = this.scene.add.group();
+    this._introText = new TextLabel(this.scene, -300, -200, "You've gone offline!", null, true, false, 0, 32);
+    this._startText = new TextLabel(this.scene, -270, 100, "Press space to start playing", null, true, true, 0, 20);
+    this._instructionText = new TextLabel(
+      this.scene,
+      -280,
+      350,
+      "WASD to move. Mouse to aim. Click to shoot.",
+      null,
+      true,
+      false,
+      0,
+      14
+    );
+    this._malwareText = new TextLabel(
+      this.scene,
+      -220,
+      390,
+      "Fight the malwares for your life",
+      null,
+      true,
+      false,
+      0,
+      14
+    );
+    this.scene.add.existing(this._introText);
+    this.scene.add.existing(this._startText);
+    this.scene.add.existing(this._instructionText);
+    this.scene.add.existing(this._malwareText);
+    this.scene.cameras.main.centerOn(0, 100);
+    // this._createWorld();
   }
 
   shutdown() {
@@ -62,14 +94,9 @@ export default class LevelManager {
   }
 
   _createWorld() {
+    this.network = new PeerNetwork(this);
     this._connectionStatusText = new TextLabel(this.scene, 0, -50, "connecting...", null, true, false, 0);
-    this._introText = new TextLabel(this.scene, -300, -200, "You've gone offline!", null, true, false, 0, 32)
-    this._instructionText = new TextLabel(this.scene, -280, 350, "WASD to move. Mouse to aim. Click to shoot.", null, true, false, 0, 14)
     this.scene.add.existing(this._connectionStatusText);
-    this.scene.add.existing(this._introText);
-    this.scene.add.existing(this._instructionText);
-    this.remotePlayers = this.scene.add.group();
-
     this.network.addListener(Const.PeerJsEvents.OPEN, this._onOpen, this);
     this.network.addListener(Const.PeerJsEvents.DATA, this._onData, this);
     this.network.addListener(Const.PeerJsEvents.CLOSE, this._onClose, this);
@@ -223,19 +250,34 @@ export default class LevelManager {
   };
 
   update() {
-    // this._updateCollision();
-    this._updateEntities();
-    if (this.leader) {
-      // SPAWN MONSTERS HERE
-      if (this._monsterGroup.getChildren().length === 0) {
-        const m = new Monster(this.scene, -40, -80, uuidv4());
-        m.setup(this.scene, this.createLaser);
-        this._monsterGroup.add(m);
+    if (this.gameStarted) {
+      // this._updateCollision();
+      this._updateEntities();
+      if (this.leader) {
+        // SPAWN MONSTERS HERE
+        if (this._monsterGroup.getChildren().length === 0) {
+          const m = new Monster(this.scene, -40, -80, uuidv4());
+          m.setup(this.scene, this.createLaser);
+          this._monsterGroup.add(m);
 
-        const m2 = new Monster(this.scene, -80, -120, uuidv4());
-        m2.setup(this.scene, this.createLaser);
-        this._monsterGroup.add(m2);
+          const m2 = new Monster(this.scene, -80, -120, uuidv4());
+          m2.setup(this.scene, this.createLaser);
+          this._monsterGroup.add(m2);
+        }
       }
+    } else {
+      this.scene.input.keyboard.on("keydown", event => {
+        switch (event.key) {
+          case " ":
+            if(!this.gameStarted){
+              this.gameStarted = true
+              this._startText.destroy();
+              this._introText.destroy();
+              this._createWorld();
+            }
+            break;
+        }
+      });
     }
   }
   _broadcastPlayerUpdate() {
