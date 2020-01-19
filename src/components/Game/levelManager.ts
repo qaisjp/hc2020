@@ -7,6 +7,7 @@ import * as Const from "./constants";
 import _ from "lodash";
 import Player from "./entities/player";
 import Spear from "./entities/spear";
+const uuidv4 = require('uuid/v4');
 
 export default class LevelManager {
   network: PeerNetwork;
@@ -59,7 +60,7 @@ export default class LevelManager {
     this.network.addListener(Const.PeerJsEvents.DATA, this._onData, this);
     this.network.addListener(Const.PeerJsEvents.CLOSE, this._onClose, this);
     const createSpear = () => {
-      const ID = "id";
+      const ID = uuidv4();
       const rotation = this.localPlayer.rotation;
       const spear = new Spear(this.scene, this.localPlayer.x, this.localPlayer.y, ID, rotation);
       this.network.broadcastToPeers(Const.PeerJsMsgType.SPEAR_CREATED, {
