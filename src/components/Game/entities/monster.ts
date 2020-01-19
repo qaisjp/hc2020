@@ -38,6 +38,12 @@ class Monster extends Phaser.Physics.Arcade.Sprite {
     }
   }
 
+  catchUp() {
+    for(const _ of [...Array(this._numRand).keys()]){
+      this._rand.frac();
+    }
+  }
+
   update() {
     if (this.body) {
       if (this.isHit) {

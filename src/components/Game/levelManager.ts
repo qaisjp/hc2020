@@ -7,6 +7,7 @@ import Player from "./entities/player";
 import Spear from "./entities/spear";
 import Monster from "./entities/monster";
 import Laser from "./entities/laser";
+import Ghost from "./entities/ghost";
 const uuidv4 = require("uuid/v4");
 
 export default class LevelManager {
@@ -17,6 +18,7 @@ export default class LevelManager {
   _instructionText: any;
   _entitiesGroup: Phaser.GameObjects.Group;
   _spearGroup: Phaser.GameObjects.Group;
+  _laserGroup: Phaser.GameObjects.Group;
   _monsterGroup: Phaser.GameObjects.Group;
   _blockGroup: Phaser.Physics.Arcade.StaticGroup;
   _physics: any;
@@ -27,7 +29,9 @@ export default class LevelManager {
   game: Phaser.Game;
   scene: Phaser.Scene;
   leader: boolean;
+  dead: boolean;
   broadcastTimer: Phaser.Time.TimerEvent | undefined;
+  ghost: any;
   constructor(game: Phaser.Game, scene: Phaser.Scene) {
     this.game = game;
     this.scene = scene;
@@ -36,6 +40,7 @@ export default class LevelManager {
     this.staticObjects = new Phaser.Physics.Arcade.Group(this.scene.physics.world, scene);
     this.leader = false;
     this._connectionStatusText = null;
+    this.dead = false;
 
     // make sure to cleanup peerjs when window is closed
     window.onunload = window.onbeforeunload = f => {
@@ -46,6 +51,7 @@ export default class LevelManager {
     // Init groups
     this._entitiesGroup = this.scene.add.group();
     this._spearGroup = this.scene.add.group();
+    this._laserGroup = this.scene.add.group();
     this._monsterGroup = this.scene.add.group();
     this._blockGroup = this.scene.physics.add.staticGroup();
     this._createWorld();
@@ -87,6 +93,33 @@ export default class LevelManager {
     arena.setup(this.scene);
     this.scene.physics.add.collider(this.localPlayer, arena._blockGroup);
     this.scene.physics.add.collider(this._monsterGroup, arena._blockGroup);
+    this.scene.physics.add.collider(this._laserGroup, arena._blockGroup, (laser, area) => {
+      const l = laser as Laser;
+      _.forEach(this._laserGroup.getChildren(), laser => {
+        if (laser && laser.id === l.id) {
+          laser.destroy();
+        }
+      });
+    });
+    this.scene.physics.add.overlap(this._laserGroup, this.localPlayer, (laser, player) => {
+      const l = laser as Laser;
+      const p = player as Player;
+      if (p.id !== "local") {
+        return;
+      }
+      _.forEach(this._laserGroup.getChildren(), laser => {
+        if (laser && laser.id === l.id) {
+          laser.destroy();
+        }
+      });
+      this.ghost = new Ghost(this.scene, p.body.x, p.body.y, "local");
+      this.ghost.setup(this.scene);
+      this.scene.cameras.main.startFollow(this.ghost);
+      this._entitiesGroup.add(this.ghost);
+      p.destroy();
+      this.network.broadcastToPeers(Const.PeerJsMsgType.PLAYER_DEAD, {});
+      this.dead = true;
+    });
     this.scene.physics.add.collider(this._spearGroup, arena._blockGroup, (spear, area) => {
       const s = spear as Spear;
       s._wallHit = true;
@@ -142,31 +175,53 @@ export default class LevelManager {
     for (const m of this._monsterGroup.getChildren()) {
       m.update();
     }
-    this._broadcastPlayerUpdate();
+    if (!this.dead) {
+      this._broadcastPlayerUpdate();
+    }
     if (this.leader) {
       this._broadcastMonstersUpdate();
     }
   }
 
+  createLaser = monster => {
+    const ID = uuidv4();
+    let closest;
+    let closestDistance = 10e10;
+    if (!this.dead) {
+      closest = this.localPlayer;
+      closestDistance = Phaser.Math.Distance.Between(
+        monster.body.x,
+        monster.body.y,
+        this.localPlayer.body.x,
+        this.localPlayer.body.y
+      );
+    }
+    for (const p of this.remotePlayers.getChildren()) {
+      const d = Phaser.Math.Distance.Between(monster.body.x, monster.body.y, p.body.x, p.body.y);
+      if (d < closestDistance) {
+        closestDistance = d;
+        closest = p;
+      }
+    }
+    if (closest) {
+      const rotationRad = Phaser.Math.Angle.Between(monster.body.x, monster.body.y, closest.body.x, closest.body.y);
+      const laser = new Laser(this.scene, monster.x, monster.y, ID, rotationRad);
+      laser.setup(this.scene, this._laserGroup);
+    }
+  };
+
   update() {
     // this._updateCollision();
     this._updateEntities();
     if (this.leader) {
-      const createLaser = (monster) => {
-        const ID = uuidv4();
-        const rotation = monster.rotation;
-        const laser = new Laser(this.scene, monster.x, monster.y, ID, rotation);
-
-        laser.setup(this.scene, this._spearGroup);
-      };
       // SPAWN MONSTERS HERE
       if (this._monsterGroup.getChildren().length === 0) {
         const m = new Monster(this.scene, -40, -80, uuidv4());
-        m.setup(this.scene, createLaser);
+        m.setup(this.scene, this.createLaser);
         this._monsterGroup.add(m);
 
         const m2 = new Monster(this.scene, -80, -120, uuidv4());
-        m2.setup(this.scene, createLaser);
+        m2.setup(this.scene, this.createLaser);
         this._monsterGroup.add(m2);
       }
     }
@@ -193,7 +248,9 @@ export default class LevelManager {
         x: Math.round(m.x),
         y: Math.round(m.y),
         vx: m.body.velocity.x.toFixed(2),
-        vy: m.body.velocity.y.toFixed(2)
+        vy: m.body.velocity.y.toFixed(2),
+        numUpdates: m._numUpdates,
+        numRand: m._numRand
       }))
     });
   }
@@ -241,6 +298,9 @@ export default class LevelManager {
         break;
       case Const.PeerJsMsgType.MONSTERS_UPDATE:
         this._handleMonstersUpdate(data);
+        break;
+      case Const.PeerJsMsgType.PLAYER_DEAD:
+        this._handlePlayerDead(remotePlayer);
         break;
     }
   }
@@ -359,13 +419,23 @@ export default class LevelManager {
         potentialMonster.body.velocity.x = monster.vx;
         potentialMonster.body.velocity.y = monster.vy;
       } else {
-        // const m = new Monster(this.scene, monster.x, monster.y, monster.id);
-        // m.setup(this.scene);
-        // m.rotation = monster.rotation;
-        // m.body.velocity.x = monster.vx;
-        // m.body.velocity.y = monster.vy;
-        // this._monsterGroup.add(m);
+        const m = new Monster(this.scene, monster.x, monster.y, monster.id);
+        m.setup(this.scene, this.createLaser);
+        m.rotation = monster.rotation;
+        m.body.velocity.x = monster.vx;
+        m.body.velocity.y = monster.vy;
+        m._numRand = monster.numRand;
+        m._numUpdates = monster.numUpdates;
+        m.catchUp();
+        this._monsterGroup.add(m);
       }
     }
+  }
+  _handlePlayerDead(remotePlayer) {
+    _.forEach(this.remotePlayers.getChildren(), player => {
+      if (player && player.id === remotePlayer.id) {
+        player.destroy();
+      }
+    });
   }
 }
