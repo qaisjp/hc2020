@@ -2,6 +2,7 @@ import React, { useRef, useEffect, useState } from "react";
 import Phaser from "phaser";
 import logoImg from "../../imgs/img.jpg";
 import spearImg from "../../imgs/spear.png";
+import avastImg from "../../imgs/avast_logo.png";
 import LevelManager from "./levelManager";
 
 import './Game.scss';
@@ -14,6 +15,7 @@ class MyScene extends Phaser.Scene {
   preload() {
     this.load.image("logo", logoImg);
     this.load.image("spear", spearImg);
+    this.load.image("avast", avastImg);
     this.load.bitmapFont("plumber_bros", "res/fonts/plumber_bros.png", "res/fonts/plumber_bros.xml");
   }
 
@@ -33,7 +35,7 @@ class MyScene extends Phaser.Scene {
     //   yoyo: true,
     //   loop: -1
     // });
-    this.cameras.main.setBackgroundColor(0x23282e)
+    this.cameras.main.setBackgroundColor(0xF7F7F7)
     this.manager = new LevelManager(this.game, this);
   }
 }

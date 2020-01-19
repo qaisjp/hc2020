@@ -98,6 +98,7 @@ export default class LevelManager {
 
   _createWorld() {
     this.network = new PeerNetwork(this);
+    this.scene.add.sprite(0, -180, "avast");
     this._connectionStatusText = new TextLabel(this.scene, 0, -50, "connecting...", null, true, false, 0);
     this.scene.add.existing(this._connectionStatusText);
     this.network.addListener(Const.PeerJsEvents.OPEN, this._onOpen, this);
@@ -335,7 +336,7 @@ export default class LevelManager {
         }
       }
       this.scene.time.delayedCall(2000, f => {
-        this.spawning = true
+        this.spawning = true;
       });
     }
     // this.scene.time.delayedCall(Const.NETWORK_STATUS_CLEAR_TIME, f => (this._connectionStatusText.visible = false));
