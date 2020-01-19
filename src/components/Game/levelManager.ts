@@ -1,8 +1,6 @@
 import PeerNetwork from "./network/peer_network";
 import { TextLabel } from "./gui/textLabel";
-import Wall, { WallThickness } from "./entities/arena/wall";
-import VerticalDoor from "./entities/arena/verticalDoor";
-import HorizontalDoor from "./entities/arena/horizontalDoor";
+import Arena from './entities/arena';
 import * as Const from "./constants";
 import _ from "lodash";
 import Player from "./entities/player";
@@ -78,47 +76,10 @@ export default class LevelManager {
     this.localPlayer.setup(this.scene);
     this.scene.cameras.main.startFollow(this.localPlayer);
     this._entitiesGroup.add(this.localPlayer);
-    const wallunit = 250;
-    const thick = WallThickness / 2;
-    const bits = [
-      { x: 32, y: 100, length: wallunit * 2, angle: 90 }, // bottom
-      { x: 32 + wallunit, y: 100 - wallunit / 2 + thick, length: wallunit, angle: 0 }, // bottom right
-      { x: 32 + wallunit * 1.5 - thick, y: 100 - wallunit + thick, length: wallunit, angle: 90 }, // right bottom
-      { x: 32 + wallunit * 2 - thick, y: 100 - wallunit * 2 + WallThickness, length: wallunit * 2, angle: 0 }, // right
-      { x: 32 + wallunit * 1.5, y: 100 - wallunit * 3 + WallThickness, length: wallunit, angle: 90 }, // right top
-      { x: 32 + wallunit, y: 100 - wallunit * 3.5 + WallThickness * 1.5, length: wallunit, angle: 0 }, // top right
-      { x: 32, y: 100 - wallunit * 4 + thick * 4, length: wallunit * 2, angle: 90 }, // top
-      { x: 32 - wallunit, y: 100 - wallunit * 3.5 + WallThickness * 1.5, length: wallunit, angle: 0 }, // top left
-      { x: 32 - wallunit * 1.5, y: 100 - wallunit * 3 + WallThickness, length: wallunit, angle: 90 }, // left top
-      { x: 32 - wallunit * 2 + thick, y: 100 - wallunit * 2 + WallThickness, length: wallunit * 2, angle: 0 }, // left
-      { x: 32 - wallunit * 1.5 + thick, y: 100 - wallunit + thick, length: wallunit, angle: 90 }, // left bottom
-      { x: 32 - wallunit, y: 100 - wallunit / 2 + thick, length: wallunit, angle: 0 } // bottom left
-    ];
-    for (const b of bits) {
-      const wall = new Wall(this.scene, b.x, b.y, b.length, b.angle);
-      wall.setup(this.scene, this._blockGroup);
-      this._blockGroup.add(wall);
-    }
-    const left_door = new VerticalDoor(
-      this.scene,
-      32 - wallunit * 2 + thick,
-      100 - wallunit * 2 + WallThickness,
-      "left"
-    );
-    left_door.setup(this.scene);
-    const right_door = new VerticalDoor(
-      this.scene,
-      32 + wallunit * 2 - thick,
-      100 - wallunit * 2 + WallThickness,
-      "right"
-    );
-    right_door.setup(this.scene);
-    const top_door = new HorizontalDoor(this.scene, 32, 100 - wallunit * 4 + thick * 4, "top");
-    top_door.setup(this.scene);
-    const bottom_door = new HorizontalDoor(this.scene, 32, 100, "bottom");
-    bottom_door.setup(this.scene);
-    this.scene.physics.add.collider(this.localPlayer, this._blockGroup);
-    this.scene.physics.add.collider(this._spearGroup, this._blockGroup, (spear, block) => {
+    const arena = new Arena(this.scene, 0, 300);
+    arena.setup(this.scene);
+    this.scene.physics.add.collider(this.localPlayer, arena._blockGroup);
+    this.scene.physics.add.collider(this._spearGroup, this._blockGroup, (spear, _) => {
       const s = spear as Spear;
       s._wallHit = true;
     });
