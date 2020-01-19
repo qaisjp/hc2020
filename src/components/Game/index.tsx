@@ -52,6 +52,7 @@ const Game = () => {
         default: "arcade",
         arcade: {
           // debug: true
+          fps: 60
         }
       }
     };

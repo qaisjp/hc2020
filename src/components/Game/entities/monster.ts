@@ -1,17 +1,19 @@
 import Entity from "./entity";
 import * as Const from "../constants";
 
-class Monster extends Entity {
+class Monster extends Phaser.Physics.Arcade.Sprite {
   id: string;
+  isHit: boolean;
   constructor(scene, x, y, id = "local") {
     super(scene, x, y, "playersheet", 0);
     this.id = id;
-    this._addAnimations([{ name: "walk", frames: [1, 2, 3] }], 8, true);
+    this.isHit = false;
   }
 
   setup(scene) {
-    super.setup(scene);
-    this.setCollideWorldBounds(false);
+    scene.physics.world.enable(this);
+    scene.add.existing(this);
+    // this.setCollideWorldBounds(false);
     if (this.body) {
       const body = this.body as Phaser.Physics.Arcade.Body;
       //   body.maxVelocity.set(10, 10 * 10);
