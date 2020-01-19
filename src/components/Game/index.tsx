@@ -16,7 +16,7 @@ class MyScene extends Phaser.Scene {
     this.load.image("logo", logoImg);
     this.load.image("spear", spearImg);
     this.load.image("avast", avastImg);
-    this.load.bitmapFont("plumber_bros", "res/fonts/plumber_bros.png", "res/fonts/plumber_bros.xml");
+    this.load.bitmapFont("plumber_bros", "res/fonts/plumber_bros_gray.png", "res/fonts/plumber_bros.xml");
   }
 
   update() {
