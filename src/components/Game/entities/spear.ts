@@ -13,6 +13,7 @@ class Spear extends Phaser.Physics.Arcade.Sprite {
   _enemyHit: boolean;
   _wallHit: boolean;
   constructor(scene, x, y, id, angle = 0) {
+    console.log("SPEAR:", x, y, angle);
     super(scene, x, y, "spear", 0);
     this.id = id;
     this._angle = angle;
@@ -22,33 +23,27 @@ class Spear extends Phaser.Physics.Arcade.Sprite {
     this._wallHit = false;
   }
 
-  setup(scene: Phaser.Scene, group: Phaser.GameObjects.Group, initSpeedBoost = [0, 0]) {
+  setup(scene: Phaser.Scene, group: Phaser.GameObjects.Group) {
     scene.physics.world.enable(this);
     scene.add.existing(this);
     group.add(this);
     if (this.body) {
       const body = this.body as Phaser.Physics.Arcade.Body;
-      body.rotation = this._angle / (2 * Math.PI) * 360
+      body.rotation = (this._angle / (2 * Math.PI)) * 360;
       var speed = this._initSpeed;
-      body.setVelocity(
-        speed * Math.cos(this._angle),
-        speed * Math.sin(this._angle)
-      );
+      body.setVelocity(speed * Math.cos(this._angle), speed * Math.sin(this._angle));
       // body.setAcceleration(accel * Math.cos(this._angle), accel * Math.sin(this._angle))
-      body.setDrag(
-        Math.abs(DRAG * Math.cos(this._angle)),
-        Math.abs(DRAG * Math.sin(this._angle))
-      );
+      body.setDrag(Math.abs(DRAG * Math.cos(this._angle)), Math.abs(DRAG * Math.sin(this._angle)));
       this._velocity = body.velocity;
       body.setMaxSpeed(this._maxSpeed);
       // body.drag.set(1, 0);
-      body.setSize(body.width - 2, body.height);
     }
   }
 
   update() {
     if (this.body) {
       const body = this.body as Phaser.Physics.Arcade.Body;
+      body.rotation = (this._angle / (2 * Math.PI)) * 360;
       if (this._enemyHit) {
         var speed = body.maxSpeed;
         body.setVelocityX(speed * Math.cos(this._angle));
