@@ -20,6 +20,7 @@ class MyScene extends Phaser.Scene {
     this.load.image("malware", malwareImg);
     this.load.bitmapFont("plumber_bros", "res/fonts/plumber_bros_gray.png", "res/fonts/plumber_bros.xml");
     this.load.multiatlas('monster', 'res/monster.json', 'res');
+    this.load.multiatlas('player', 'res/player.json', 'res');
   }
 
   update() {
@@ -62,7 +63,7 @@ const Game = () => {
       physics: {
         default: "arcade",
         arcade: {
-          // debug: true
+          debug: true,
           fps: 60
         }
       }

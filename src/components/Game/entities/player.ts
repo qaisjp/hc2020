@@ -10,6 +10,8 @@ let PlayerStates = {
   Ducking: 4
 };
 
+const SCALE = 0.2
+
 class Player extends Entity {
   id: string;
   jumpReleased: boolean;
@@ -28,7 +30,16 @@ class Player extends Entity {
   isPlayer: boolean;
   hasSpear: boolean;
   constructor(scene, x, y, id = "local", isPlayer = false, createSpear: Function | undefined = undefined) {
-    super(scene, x, y, "playersheet", 0);
+    super(scene, x, y, "player", 0);
+    this.scene.anims.create({
+      key: "idle_spear",
+      frames: [
+        { key: "player", frame: "pixil-frame-0.png" },
+        { key: "player", frame: "pixil-frame-1.png" }
+      ],
+      frameRate: 2,
+      repeat: -1
+    });
     this.id = id;
     this.isPlayer = isPlayer;
     // this.maxSpeed = Const.PLAYER_MAX_SPEED;
@@ -44,11 +55,13 @@ class Player extends Entity {
     this.hasSpear = true;
     this.isNew = true;
     this.currentScale = 2.8;
-    this._addAnimations([{ name: "walk", frames: [1, 2, 3] }], 8, true);
+    // this._addAnimations([{ name: "walk", frames: [1, 2, 3] }], 8, true);
   }
 
   setup(scene) {
     super.setup(scene);
+    this.anims.play("idle_spear");
+    this.setScale(0.01);
     this.cursors = this.scene.input.keyboard.addKeys({
       up: Phaser.Input.Keyboard.KeyCodes.W,
       down: Phaser.Input.Keyboard.KeyCodes.S,
@@ -63,7 +76,7 @@ class Player extends Entity {
       //   body.maxVelocity.set(10, 10 * 10);
       body.setDrag(1200, 1200);
       body.setMaxSpeed(300);
-      body.setSize(body.width - 2, body.height);
+      // body.setSize(body.width - 2, body.height);
     }
   }
 
@@ -71,9 +84,9 @@ class Player extends Entity {
     if (this.isNew) {
       this.scale = this.currentScale;
       this.currentScale -= 0.05;
-      if (this.currentScale <= 1.0) {
-        this.scale = 1;
+      if (this.currentScale <= SCALE) {
         this.isNew = false;
+        this.scale = SCALE;
         this.scene.cameras.main.shake(200, 0.005);
       }
       return;

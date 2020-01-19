@@ -69,7 +69,7 @@ export default class LevelManager {
     this._introText = new TextLabel(this.scene, -300, -200, "You've gone offline!", null, true, false, 0, 32);
     this._titleSprite = this.scene.add.sprite(0, -30, "malware")
     this._titleSprite.setScale(2)
-    this._deadText = new TextLabel(this.scene, -150, -200, "He's dead Jim!", null, true, false, 0, 32);
+    this._deadText = new TextLabel(this.scene, -190, -200, "He's dead Jim!", null, true, false, 0, 32);
     this._startText = new TextLabel(this.scene, -270, 100, "Press space to start playing", null, true, true, 0, 20);
     this._instructionText = new TextLabel(
       this.scene,
