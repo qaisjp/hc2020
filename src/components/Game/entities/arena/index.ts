@@ -1,13 +1,17 @@
 import Phaser from "phaser"
 
-import {WallThickness} from './wall';
+import Wall, {WallThickness} from './wall';
+import VerticalDoor from './verticalDoor';
+import HorizontalDoor from './horizontalDoor';
 
-class Arena {
+export default class Arena {
     x: number;
     y: number;
+    _blockGroup: Phaser.Physics.Arcade.StaticGroup;
     constructor(scene : Phaser.Scene, x: number, y: number) {
         this.x = x;
         this.y = y;
+        this._blockGroup = scene.physics.add.staticGroup();
     }
 
     setup(scene : Phaser.Scene) {
@@ -27,7 +31,19 @@ class Arena {
           { x: this.x - wallunit * 1.5 + thick, y: this.y - wallunit + thick, length: wallunit, angle: 90 }, // left bottom
           { x: this.x - wallunit, y: this.y - wallunit / 2 + thick, length: wallunit, angle: 0 } // bottom left
         ];
+
+        for (const b of bits) {
+            const wall = new Wall(scene, b.x, b.y, b.length, b.angle);
+            wall.setup(scene, this._blockGroup);
+            this._blockGroup.add(wall);
+        }
+        const left_door = new VerticalDoor(scene, this.x - wallunit * 2 + thick, this.y - wallunit * 2 + WallThickness, 'left');
+        left_door.setup(scene);
+        const right_door= new VerticalDoor(scene, this.x + wallunit * 2 - thick, this.y - wallunit * 2 + WallThickness, 'right');
+        right_door.setup(scene);
+        const top_door = new HorizontalDoor(scene, this.x, this.y - wallunit * 4 + thick * 4, 'top');
+        top_door.setup(scene);
+        const bottom_door= new HorizontalDoor(scene, this.x, this.y, 'bottom');
+        bottom_door.setup(scene);
     }
 }
-
-export default Arena;
