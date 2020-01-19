@@ -2,6 +2,7 @@ import React, { useRef, useEffect, useState } from "react";
 import Phaser from "phaser";
 import logoImg from "../../imgs/img.jpg";
 import spearImg from "../../imgs/spear_gray.png";
+import malwareImg from "../../imgs/malware_gladiator.png";
 import avastImg from "../../imgs/avast_logo_light.png";
 import LevelManager from "./levelManager";
 
@@ -16,6 +17,7 @@ class MyScene extends Phaser.Scene {
     this.load.image("logo", logoImg);
     this.load.image("spear", spearImg);
     this.load.image("avast", avastImg);
+    this.load.image("malware", malwareImg);
     this.load.bitmapFont("plumber_bros", "res/fonts/plumber_bros_gray.png", "res/fonts/plumber_bros.xml");
   }
 

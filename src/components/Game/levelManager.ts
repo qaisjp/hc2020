@@ -17,6 +17,7 @@ export default class LevelManager {
   remotePlayers: any;
   _connectionStatusText: any;
   _introText: any;
+  _titleSprite: any;
   _startText: any;
   _instructionText: any;
   _malwareText: any;
@@ -65,6 +66,8 @@ export default class LevelManager {
     this._blockGroup = this.scene.physics.add.staticGroup();
     this.remotePlayers = this.scene.add.group();
     this._introText = new TextLabel(this.scene, -300, -200, "You've gone offline!", null, true, false, 0, 32);
+    this._titleSprite = this.scene.add.sprite(0, -30, "malware")
+    this._titleSprite.setScale(2)
     this._startText = new TextLabel(this.scene, -270, 100, "Press space to start playing", null, true, true, 0, 20);
     this._instructionText = new TextLabel(
       this.scene,
@@ -293,6 +296,7 @@ export default class LevelManager {
               this.gameStarted = true;
               this._startText.destroy();
               this._introText.destroy();
+              this._titleSprite.destroy();
               this._createWorld();
             }
             break;
