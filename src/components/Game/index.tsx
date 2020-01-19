@@ -4,6 +4,8 @@ import logoImg from "../../imgs/img.jpg";
 import spearImg from "../../imgs/spear.png";
 import LevelManager from "./levelManager";
 
+import './Game.scss';
+
 class MyScene extends Phaser.Scene {
   manager: LevelManager | undefined;
   constructor() {
