@@ -79,9 +79,16 @@ export default class LevelManager {
     const arena = new Arena(this.scene, 0, 300);
     arena.setup(this.scene);
     this.scene.physics.add.collider(this.localPlayer, arena._blockGroup);
-    this.scene.physics.add.collider(this._spearGroup, arena._blockGroup, (spear, are) => {
+    this.scene.physics.add.collider(this._spearGroup, arena._blockGroup, (spear, area) => {
       const s = spear as Spear;
       s._wallHit = true;
+    });
+    this.scene.physics.add.overlap(this._spearGroup, this._monsterGroup, (spear, monster) => {
+      const s = spear as Spear;
+      const m = monster as Monster;
+      m.isHit = true;
+      m.body.mass = 0;
+      s._monstersHit.add(m)
     });
     this.scene.physics.add.collider(this._spearGroup, this.localPlayer, (spear, player) => {
       const s = spear as Spear;
@@ -142,6 +149,11 @@ export default class LevelManager {
         const m = new Monster(this.scene, -60, -100, uuidv4());
         m.setup(this.scene);
         this._monsterGroup.add(m);
+
+        const m2 = new Monster(this.scene, -80, -120, uuidv4());
+        m2.setup(this.scene);
+        this._monsterGroup.add(m2);
+
       }
     }
   }

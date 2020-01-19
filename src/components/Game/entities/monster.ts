@@ -1,12 +1,12 @@
 import Entity from "./entity";
 import * as Const from "../constants";
 
+const DRAG = 1200;
+const JUMP_VEL = 300;
 
-const JUMP_VEL = 300
-const DRAG = 1300
-
-class Monster extends Entity {
+class Monster extends Phaser.Physics.Arcade.Sprite {
   id: string;
+  isHit: boolean;
   _rand: any;
   _numUpdates: number;
   _numRand: number;
@@ -14,15 +14,16 @@ class Monster extends Entity {
   constructor(scene, x, y, id = "local") {
     super(scene, x, y, "playersheet", 0);
     this.id = id;
+    this.isHit = false;
     this._rand = new Phaser.Math.RandomDataGenerator(this.id);
     this._numUpdates = 0;
     this._numRand = 0;
-    this._addAnimations([{ name: "walk", frames: [1, 2, 3] }], 8, true);
   }
 
   setup(scene) {
-    super.setup(scene);
-    this.setCollideWorldBounds(false);
+    scene.physics.world.enable(this);
+    scene.add.existing(this);
+    // this.setCollideWorldBounds(false);
     if (this.body) {
       const body = this.body as Phaser.Physics.Arcade.Body;
       //   body.maxVelocity.set(10, 10 * 10);
