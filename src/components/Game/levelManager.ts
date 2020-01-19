@@ -353,7 +353,7 @@ export default class LevelManager {
         potentialMonster.body.velocity.x = monster.vx;
         potentialMonster.body.velocity.y = monster.vy;
       } else {
-        const m = new Monster(this.scene, monster.x, monster.y, uuidv4());
+        const m = new Monster(this.scene, monster.x, monster.y, monster.id);
         m.setup(this.scene);
         m.rotation = monster.rotation;
         m.body.velocity.x = monster.vx;

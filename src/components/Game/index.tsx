@@ -38,6 +38,7 @@ class MyScene extends Phaser.Scene {
 const Game = () => {
   useEffect(() => {
     let game;
+    console.log(window.innerWidth);
     window.addEventListener('resize', () => {
       game.scale.resize(window.innerWidth, window.innerHeight);
     })
@@ -60,7 +61,7 @@ const Game = () => {
     };
 
     game = new Phaser.Game(config);
-
+    game.scale.resize(window.innerWidth, window.innerHeight);
     return () => {};
   }, []);
 
