@@ -118,11 +118,11 @@ export default class LevelManager {
 
   shutdown() {
     this.remotePlayers.destroy();
-    // this.gameStarted = false;
-    // this.spawning = false;
-    // setTimeout(() => {
-    //   window.location.href = "";
-    // }, 700);
+    this.gameStarted = false;
+    this.spawning = false;
+    setTimeout(() => {
+      window.location.href = "";
+    }, 700);
   }
 
   _createWorld() {
